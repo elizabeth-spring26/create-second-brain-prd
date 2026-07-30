@@ -1,0 +1,23 @@
+# Secrets — never commit
+.secrets/
+.env
+*.token.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# DB / index files
+*.db
+*.db-shm
+*.db-wal
+*.vec
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Telegram long-poll offset (local runtime state)
+server/.telegram_offset

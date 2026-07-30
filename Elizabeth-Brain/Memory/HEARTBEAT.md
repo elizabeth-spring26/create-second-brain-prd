@@ -2,13 +2,12 @@
 
 ## Schedule
 
-| Time | Run ID | What It Does |
-|------|--------|--------------|
-| 7:45 AM | `wake-nudge` | Windows Toast: "Good morning Elizabeth! Time to start your day." |
-| 8:00 AM | `morning` | Full briefing + HABITS reset + draft scan + Plaid balance summary |
-| 12:00 PM | `midday` | New Gmail threads needing reply, Slack mentions, overdue Notion tasks |
-| 6:00 PM | `evening` | Habit pillar status + "What's unchecked?" + reflection prompt |
-| 9:00 PM | `wrapup` | "Wrap-up time. What did you accomplish today?" |
+| Time     | Run ID       | What It Does                                                                    |
+| -------- | ------------ | ------------------------------------------------------------------------------- |
+| 8:00 AM  | `morning`    | Positive Affirmations + Full briefing + HABITS reset + draft scan               |
+| 12:00 PM | `midday`     | New Gmail threads needing reply, granola and canvas tasks                       |
+| 6:00 PM  | `evening`    | Habit pillar status + "What's unchecked?" + reflection prompt                   |
+| 9:00 PM  | `wrapup`     | "Wrap-up time. What did you accomplish today?"                                  |
 | 10:00 PM | `late-nudge` | If evening reflection not done: "Don't forget to reflect before you wind down." |
 
 ## Morning Run (8:00 AM) — Full Detail
@@ -16,19 +15,17 @@
 1. Reset `HABITS.md` daily checklist (clear all checkboxes)
 2. Pull today's Google Calendar events
 3. Pull unread Gmail threads (not promotions/social/updates)
-4. Pull top 3 Notion tasks due today
-5. Pull Plaid account balances
-6. Scan for Gmail threads with no reply in >24h → queue draft opportunities
-7. Auto-detect habit completions (Fitness via Calendar, Deep Work via GitHub/Notion, Finances via Plaid)
-8. Build and display morning briefing
-9. Append briefing to `daily/YYYY-MM-DD.md`
+   4 . Pull Plaid account balances
+   5 . Scan for Gmail threads with no reply in >24h → queue draft opportunities
+   6 . Auto-detect habit completions (Fitness via Calendar, Deep Work via GitHub/Notion, Finances via Plaid)
+   7 . Build and display morning briefing
+   8 . Append briefing to `daily/YYYY-MM-DD.md`
 
 ## Midday Run (12:00 PM)
 
 1. Check for new important Gmail threads since 8 AM
-2. Check Slack mentions (if integrated)
-3. Flag Notion tasks that are overdue or due today and not started
-4. Notify via Windows Toast if anything actionable
+2. Flag canvas and daily tasks that are overdue or due today and not started. Also ask me to put in tasks, I should be able to manually put them in.
+3. Notify via Slack if anything actionable
 
 ## Evening Run (6:00 PM)
 

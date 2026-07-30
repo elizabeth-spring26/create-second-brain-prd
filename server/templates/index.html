@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elizabeth's Second Brain</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f7f6f2;
+      --card: #ffffff;
+      --border: #e8e6df;
+      --text: #1a1814;
+      --muted: #8a8780;
+      --accent: #6c5ce7;
+      --accent-light: #ede9fc;
+      --green: #00b894;
+      --green-light: #e0faf4;
+      --radius: 14px;
+      --shadow: 0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.04);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px 80px;
+    }
+
+    header {
+      max-width: 960px;
+      margin: 0 auto 28px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    header h1 { font-size: 1.1rem; font-weight: 600; color: var(--muted); letter-spacing: -0.01em; }
+    header .date { font-size: 0.85rem; color: var(--muted); }
+
+    .affirmation {
+      max-width: 960px;
+      margin: 0 auto 24px;
+      background: var(--accent-light);
+      border-left: 3px solid var(--accent);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 0.9rem;
+      font-style: italic;
+      color: #4a3fa0;
+      line-height: 1.5;
+    }
+
+    .grid {
+      max-width: 960px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    .card.full { grid-column: 1 / -1; }
+
+    .card-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* Task input */
+    .task-input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .task-input-row input {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .task-input-row input:focus { border-color: var(--accent); }
+    .task-input-row input::placeholder { color: var(--muted); }
+
+    .btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+    }
+    .btn:hover { opacity: 0.88; }
+    .btn:disabled { opacity: 0.5; cursor: default; }
+
+    /* Checklist items */
+    .check-list { display: flex; flex-direction: column; gap: 6px; }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      transition: background 0.1s;
+      cursor: default;
+    }
+    .check-item:hover { background: var(--bg); }
+
+    .check-item input[type="checkbox"] {
+      width: 16px; height: 16px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .check-item label {
+      font-size: 0.9rem;
+      line-height: 1.4;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .check-item.done label { text-decoration: line-through; color: var(--muted); }
+
+    .empty { color: var(--muted); font-size: 0.875rem; padding: 8px 0; }
+
+    /* Goals */
+    .goals-grid { display: flex; flex-direction: column; gap: 8px; }
+
+    .goal-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.875rem;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: var(--bg);
+    }
+
+    .goal-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      flex-shrink: 0;
+    }
+
+    /* Insights */
+    .insights { display: flex; flex-direction: column; gap: 8px; }
+
+    .insight {
+      font-size: 0.875rem;
+      line-height: 1.5;
+      padding: 8px 12px;
+      background: var(--bg);
+      border-radius: 8px;
+      color: var(--text);
+    }
+
+    /* Chat */
+    .chat-messages {
+      min-height: 120px;
+      max-height: 360px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 14px;
+      padding-right: 4px;
+    }
+
+    .msg {
+      max-width: 88%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .msg.user { background: var(--accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .msg.assistant { background: var(--bg); border: 1px solid var(--border); align-self: flex-start; border-bottom-left-radius: 4px; }
+    .msg.thinking { color: var(--muted); font-style: italic; }
+
+    .chat-input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .chat-input-row input {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .chat-input-row input:focus { border-color: var(--accent); }
+
+    .loading { text-align: center; padding: 20px; color: var(--muted); font-size: 0.85rem; }
+
+    /* Habits progress */
+    .habits-progress {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 14px;
+    }
+    .habits-progress .pip {
+      flex: 1;
+      height: 4px;
+      border-radius: 99px;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .habits-progress .pip.done { background: var(--green); }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Elizabeth's Second Brain</h1>
+  <span class="date" id="dateLabel"></span>
+</header>
+
+<div class="affirmation" id="affirmation" style="display:none"></div>
+
+<div class="grid">
+
+  <!-- Tasks -->
+  <div class="card">
+    <div class="card-title">Today's Tasks</div>
+    <div class="task-input-row">
+      <input id="taskInput" type="text" placeholder="Add a task..." />
+      <button class="btn" id="taskBtn" onclick="addTask()">Add</button>
+    </div>
+    <div class="check-list" id="taskList">
+      <div class="loading">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Habits -->
+  <div class="card">
+    <div class="card-title">Habits</div>
+    <div class="habits-progress" id="habitsPips"></div>
+    <div class="check-list" id="habitList">
+      <div class="loading">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Goals -->
+  <div class="card">
+    <div class="card-title">Active Goals</div>
+    <div class="goals-grid" id="goalsList">
+      <div class="loading">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Therapy Insights -->
+  <div class="card">
+    <div class="card-title">Therapy Insights</div>
+    <div class="insights" id="insightsList">
+      <div class="loading">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <div class="card full">
+    <div class="card-title">Ask Your Second Brain</div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="msg assistant">Hey Elizabeth — what do you need today?</div>
+    </div>
+    <div class="chat-input-row">
+      <input id="chatInput" type="text" placeholder="Ask anything about your goals, tasks, or notes..." onkeydown="if(event.key==='Enter') sendChat()" />
+      <button class="btn" id="chatBtn" onclick="sendChat()">Send</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const API = "";
+  const chatHistory = [];
+
+  // Date
+  const now = new Date();
+  document.getElementById("dateLabel").textContent = now.toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric"
+  });
+
+  // Enter key for task
+  document.getElementById("taskInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") addTask();
+  });
+
+  // ── Load today ─────────────────────────────────────────────────────────────
+
+  async function loadToday() {
+    const res = await fetch(`${API}/api/today`);
+    const data = await res.json();
+    renderTasks(data.tasks);
+    renderHabits(data.habits);
+  }
+
+  function renderTasks(tasks) {
+    const el = document.getElementById("taskList");
+    if (!tasks.length) {
+      el.innerHTML = '<div class="empty">No tasks yet — add one above</div>';
+      return;
+    }
+    el.innerHTML = tasks.map((t, i) => `
+      <div class="check-item ${t.done ? 'done' : ''}" id="task-${i}">
+        <input type="checkbox" id="tc-${i}" ${t.done ? 'checked' : ''} onchange="toggleTask(${i}, this.checked)" />
+        <label for="tc-${i}">${escHtml(t.text)}</label>
+      </div>
+    `).join("");
+  }
+
+  function renderHabits(habits) {
+    const pips = document.getElementById("habitsPips");
+    const el = document.getElementById("habitList");
+    const done = habits.filter(h => h.done).length;
+
+    pips.innerHTML = habits.map(h =>
+      `<div class="pip ${h.done ? 'done' : ''}"></div>`
+    ).join("");
+
+    if (!habits.length) {
+      el.innerHTML = '<div class="empty">No habits found in HABITS.md</div>';
+      return;
+    }
+    el.innerHTML = habits.map((h, i) => `
+      <div class="check-item ${h.done ? 'done' : ''}">
+        <input type="checkbox" id="hc-${i}" ${h.done ? 'checked' : ''} disabled />
+        <label for="hc-${i}">${escHtml(h.text)}</label>
+      </div>
+    `).join("");
+  }
+
+  // ── Load goals ─────────────────────────────────────────────────────────────
+
+  async function loadGoals() {
+    const res = await fetch(`${API}/api/goals`);
+    const goals = await res.json();
+    const el = document.getElementById("goalsList");
+    if (!goals.length) {
+      el.innerHTML = '<div class="empty">No goals found</div>';
+      return;
+    }
+    el.innerHTML = goals.map(g => `
+      <div class="goal-pill">
+        <div class="goal-dot"></div>
+        <span>${escHtml(g.title)}</span>
+      </div>
+    `).join("");
+  }
+
+  // ── Load therapy ───────────────────────────────────────────────────────────
+
+  async function loadTherapy() {
+    const res = await fetch(`${API}/api/therapy/recent`);
+    const data = await res.json();
+
+    if (data.affirmation) {
+      const af = document.getElementById("affirmation");
+      af.textContent = `"${data.affirmation}"`;
+      af.style.display = "";
+    }
+
+    const el = document.getElementById("insightsList");
+    if (!data.insights || !data.insights.length) {
+      el.innerHTML = '<div class="empty">No recent therapy notes</div>';
+      return;
+    }
+    el.innerHTML = data.insights.map(i =>
+      `<div class="insight">• ${escHtml(i)}</div>`
+    ).join("");
+
+    if (data.date) {
+      el.insertAdjacentHTML("beforeend",
+        `<div style="font-size:0.75rem;color:var(--muted);margin-top:6px">From session ${data.date}</div>`
+      );
+    }
+  }
+
+  // ── Add task ───────────────────────────────────────────────────────────────
+
+  async function addTask() {
+    const input = document.getElementById("taskInput");
+    const btn = document.getElementById("taskBtn");
+    const text = input.value.trim();
+    if (!text) return;
+
+    btn.disabled = true;
+    btn.textContent = "Adding…";
+
+    await fetch(`${API}/api/tasks`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ task: text }),
+    });
+
+    input.value = "";
+    btn.disabled = false;
+    btn.textContent = "Add";
+    await loadToday();
+  }
+
+  function toggleTask(i, checked) {
+    // Visual only — full check-off persistence is a future phase
+    const row = document.getElementById(`task-${i}`);
+    if (checked) row.classList.add("done");
+    else row.classList.remove("done");
+  }
+
+  // ── Chat ───────────────────────────────────────────────────────────────────
+
+  async function sendChat() {
+    const input = document.getElementById("chatInput");
+    const btn = document.getElementById("chatBtn");
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    input.value = "";
+    btn.disabled = true;
+
+    appendMsg("user", msg);
+    chatHistory.push({ role: "user", content: msg });
+
+    const thinking = appendMsg("assistant", "Thinking…", true);
+
+    const res = await fetch(`${API}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: msg, history: chatHistory.slice(0, -1) }),
+    });
+    const data = await res.json();
+    const reply = data.reply || data.error || "Something went wrong.";
+
+    thinking.remove();
+    appendMsg("assistant", reply);
+    chatHistory.push({ role: "assistant", content: reply });
+
+    btn.disabled = false;
+  }
+
+  function appendMsg(role, text, isThinking = false) {
+    const box = document.getElementById("chatMessages");
+    const el = document.createElement("div");
+    el.className = `msg ${role}${isThinking ? " thinking" : ""}`;
+    el.textContent = text;
+    box.appendChild(el);
+    box.scrollTop = box.scrollHeight;
+    return el;
+  }
+
+  // ── Utils ──────────────────────────────────────────────────────────────────
+
+  function escHtml(str) {
+    return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+
+  loadToday();
+  loadGoals();
+  loadTherapy();
+</script>
+</body>
+</html>

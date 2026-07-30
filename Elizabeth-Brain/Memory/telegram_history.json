@@ -1,0 +1,10 @@
+[
+  {
+    "role": "user",
+    "content": "remind me to drink water"
+  },
+  {
+    "role": "assistant",
+    "content": "Quick clarifying question \u2014 when do you want the reminder? (e.g., in 10 minutes, every morning at 8am, right now?)"
+  }
+]
