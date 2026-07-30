@@ -6,5 +6,13 @@
   {
     "role": "assistant",
     "content": "Quick clarifying question \u2014 when do you want the reminder? (e.g., in 10 minutes, every morning at 8am, right now?)"
+  },
+  {
+    "role": "user",
+    "content": "remind me to take my vitamins every day at 8am"
+  },
+  {
+    "role": "assistant",
+    "content": "Done! You'll get a daily 8am reminder to take your vitamins. \ud83d\udc8a\n\nNow \u2014 when did you want that water reminder?"
   }
 ]
