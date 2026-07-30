@@ -16,5 +16,23 @@
     "until": null,
     "status": "pending",
     "created": "2026-07-30T01:06:58.806467-04:00"
+  },
+  {
+    "id": "ac988c9a",
+    "text": "To-do (Jul 28 Ghost Eye mtg): Send Ghost Eye the Generator Lab one-pager via LinkedIn \u2014 include event details, sponsor info, and speaking-session framing (founder experience + student inspiration).",
+    "remind_at": "2026-07-30T09:30:00",
+    "repeat": "none",
+    "until": null,
+    "status": "pending",
+    "created": "2026-07-30T15:38:57.457839-04:00"
+  },
+  {
+    "id": "f89d15e8",
+    "text": "To-do (Jul 28 Ghost Eye mtg): Follow up on the personal involvement opportunity \u2014 they\u2019ll consider a role / campus-ambassador fit and get back via LinkedIn.",
+    "remind_at": "2026-07-30T09:30:00",
+    "repeat": "none",
+    "until": null,
+    "status": "pending",
+    "created": "2026-07-30T15:38:57.457839-04:00"
   }
 ]
