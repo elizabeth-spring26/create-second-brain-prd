@@ -20,14 +20,22 @@ _REPEAT_DELTAS = {
 }
 
 
-def advance_recurring(remind_at, repeat, now):
-    """Return the next occurrence strictly after `now`, or None if not recurring."""
+def advance_recurring(remind_at, repeat, now, until=None):
+    """Return the next occurrence strictly after `now`, or None if the reminder
+    is one-time or has passed its `until` cutoff (an inclusive 'YYYY-MM-DD')."""
     delta = _REPEAT_DELTAS.get(repeat)
     if delta is None:
         return None
     nxt = remind_at
     while nxt <= now:
         nxt += delta
+    if until:
+        try:
+            cutoff = datetime.fromisoformat(until).date()
+            if nxt.date() > cutoff:
+                return None
+        except ValueError:
+            pass
     return nxt
 
 
@@ -64,7 +72,7 @@ def main():
             remind_at = remind_at.replace(tzinfo=TZ)
         if remind_at <= now:
             if send_telegram(f"Reminder: {r['text']}"):
-                nxt = advance_recurring(remind_at, r.get("repeat", "none"), now)
+                nxt = advance_recurring(remind_at, r.get("repeat", "none"), now, r.get("until"))
                 if nxt is not None:
                     r["remind_at"] = nxt.isoformat()  # reschedule, stays pending
                 else:
