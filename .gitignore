@@ -21,3 +21,5 @@ Thumbs.db
 
 # Telegram long-poll offset (local runtime state)
 server/.telegram_offset
+
+.vercel

@@ -6,14 +6,29 @@ The workflow commits the updated file back. Kept dependency-free (just
 """
 import json
 import os
-import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import requests
 
 TZ = ZoneInfo("America/New_York")
 REMINDERS_FILE = "Elizabeth-Brain/Memory/reminders.json"
+
+_REPEAT_DELTAS = {
+    "daily": timedelta(days=1),
+    "weekly": timedelta(weeks=1),
+}
+
+
+def advance_recurring(remind_at, repeat, now):
+    """Return the next occurrence strictly after `now`, or None if not recurring."""
+    delta = _REPEAT_DELTAS.get(repeat)
+    if delta is None:
+        return None
+    nxt = remind_at
+    while nxt <= now:
+        nxt += delta
+    return nxt
 
 
 def send_telegram(text):
@@ -49,7 +64,11 @@ def main():
             remind_at = remind_at.replace(tzinfo=TZ)
         if remind_at <= now:
             if send_telegram(f"Reminder: {r['text']}"):
-                r["status"] = "sent"
+                nxt = advance_recurring(remind_at, r.get("repeat", "none"), now)
+                if nxt is not None:
+                    r["remind_at"] = nxt.isoformat()  # reschedule, stays pending
+                else:
+                    r["status"] = "sent"
                 changed = True
 
     if changed:
