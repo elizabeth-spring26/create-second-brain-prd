@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo
 
 import anthropic
 
+import google_calendar
 from github_vault import read_file, write_file
 
 TZ = ZoneInfo("America/New_York")
@@ -118,6 +119,24 @@ TOOLS = [
             "required": ["id"],
         },
     },
+    {
+        "name": "read_calendar",
+        "description": "Read Elizabeth's Google Calendar events in a date range. Use when she asks what's on her calendar, schedule, or agenda.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "start": {
+                    "type": "string",
+                    "description": "Range start as ISO 8601 in America/New_York, e.g. '2026-07-30T00:00:00'. Compute from the current time in context (e.g. today = start of today).",
+                },
+                "end": {
+                    "type": "string",
+                    "description": "Range end as ISO 8601 in America/New_York, e.g. '2026-07-30T23:59:59'.",
+                },
+            },
+            "required": ["start", "end"],
+        },
+    },
 ]
 
 
@@ -168,6 +187,15 @@ def _run_tool(name, tool_input):
         save_reminders(reminders)
         return f"Cancelled reminder {target_id}." if found else f"No pending reminder found with id {target_id}."
 
+    if name == "read_calendar":
+        if not google_calendar.is_configured():
+            return "Google Calendar isn't connected yet."
+        try:
+            events = google_calendar.list_events(tool_input["start"], tool_input["end"])
+        except Exception as e:  # noqa: BLE001 — surface any API/auth error to the chat
+            return f"Couldn't read the calendar: {e}"
+        return google_calendar.summarize_events(events)
+
     return f"Unknown tool: {name}"
 
 
@@ -188,9 +216,10 @@ You are Elizabeth's second brain, chatting with her {channel_note or "over text"
 Keep replies short and conversational — this is a chat message, not an essay. Use the reminder tools to
 schedule, list, or cancel reminders. Reminders can be one-time or recurring — if she says "every day",
 "daily", "each morning", etc., set repeat="daily" (or "weekly" for weekly); otherwise leave it one-time.
-If she asks to be reminded of something but the timing is ambiguous, ask a clarifying question before
-calling create_reminder. Never claim to send emails, Slack messages, or post anywhere — texting reminders
-back to her is the one thing you can do autonomously."""
+If a recurring habit has a known end date, set `until`. If she asks what's on her calendar, her schedule,
+or her agenda, use read_calendar. If she asks to be reminded of something but the timing is ambiguous,
+ask a clarifying question before calling create_reminder. Never claim to send emails, Slack messages, or
+post anywhere — texting reminders back to her is the one thing you can do autonomously."""
 
     history = load_history(history_path)
     messages = [{"role": h["role"], "content": h["content"]} for h in history[-HISTORY_TURNS:]]
