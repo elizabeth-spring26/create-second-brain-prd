@@ -65,14 +65,15 @@
 
 ### Telegram (reminders + two-way chat)
 
-- Switched from Twilio SMS to Telegram — Twilio required geo/A2P messaging config that wasn't enabled on the account and inbound webhooks never fired; Telegram's Bot API needs no carrier registration and works via long-polling (no public URL required at all, even in production)
-- Bot token: `TELEGRAM_BOT_TOKEN` in `.env` (from @BotFather)
-- Elizabeth's chat id: `TELEGRAM_CHAT_ID` in `.env` — only this chat is trusted; found via `python server/telegram_get_chat_id.py`
-- Transport: long-polling in a background thread (`server/telegram_bot.py`) — no webhook route, no ngrok/tunnel needed even locally
+- Switched from Twilio SMS to Telegram — Twilio required geo/A2P messaging config that wasn't enabled on the account and inbound webhooks never fired; Telegram's Bot API needs no carrier registration
+- Hosting split to avoid Railway's paid tier: chat runs on **Vercel** (serverless, webhook-driven), reminders are delivered by a **GitHub Actions cron job** (`.github/workflows/check-reminders.yml`, every 5 min) — no always-on server needed at all
+- Bot token: `TELEGRAM_BOT_TOKEN` in `.env` / Vercel env vars / GH Actions secrets (from @BotFather)
+- Elizabeth's chat id: `TELEGRAM_CHAT_ID` — only this chat is trusted; found via `python server/telegram_get_chat_id.py` (must run before the webhook is registered — Telegram disables `getUpdates` once a webhook is set)
+- Webhook secret: `TELEGRAM_WEBHOOK_SECRET` — random token verified against Telegram's `X-Telegram-Bot-Api-Secret-Token` header on every inbound request
+- Chat transport: `POST /api/telegram-webhook` (`server/app.py` → `server/telegram_bot.py`), deployed to Vercel via `api/index.py` + `vercel.json`; register with `python server/telegram_set_webhook.py https://<app>.vercel.app` after each deploy of a new URL
 - Shared reminder/chat logic lives in `server/reminder_core.py` (Claude tool-use loop with `create_reminder` / `list_reminders` / `cancel_reminder`)
 - Reminders persisted at `Elizabeth-Brain/Memory/reminders.json`; conversation context at `telegram_history.json`
-- Background scheduler (`APScheduler`, in-process) checks for due reminders every 60s and messages Elizabeth
-- Runs on a single gunicorn worker (`-w 1`) — required so the scheduler/poller doesn't fire duplicate messages
+- Reminder delivery: `scripts/check_reminders.py` runs standalone in GH Actions (no Flask/Anthropic deps), reads/sends/marks-sent, and the workflow commits the updated `reminders.json` back to the repo
 
 ## Security Boundaries
 
