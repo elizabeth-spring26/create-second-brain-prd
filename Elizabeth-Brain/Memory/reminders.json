@@ -1,10 +1,20 @@
 [
   {
-    "id": "1ca52047",
-    "text": "Take your vitamins \ud83d\udc8a",
-    "remind_at": "2026-07-30T08:00:00",
+    "id": "40785fbd",
+    "text": "Good morning, Elizabeth \u2014 time to wake up \u2600\ufe0f",
+    "remind_at": "2026-07-30T09:00:00",
     "repeat": "daily",
+    "until": "2026-08-27",
     "status": "pending",
-    "created": "2026-07-30T00:52:32.126141-04:00"
+    "created": "2026-07-30T01:06:58.806467-04:00"
+  },
+  {
+    "id": "03ec2d58",
+    "text": "Good morning, Elizabeth \u2014 time to wake up \u2600\ufe0f (new 8:30 start!)",
+    "remind_at": "2026-08-28T08:30:00",
+    "repeat": "daily",
+    "until": null,
+    "status": "pending",
+    "created": "2026-07-30T01:06:58.806467-04:00"
   }
 ]
