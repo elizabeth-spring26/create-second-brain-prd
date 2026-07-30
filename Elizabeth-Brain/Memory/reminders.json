@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "id": "1ca52047",
+    "text": "Take your vitamins \ud83d\udc8a",
+    "remind_at": "2026-07-30T08:00:00",
+    "repeat": "daily",
+    "status": "pending",
+    "created": "2026-07-30T00:52:32.126141-04:00"
+  }
+]
