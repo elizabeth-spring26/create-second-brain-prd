@@ -2,10 +2,10 @@
   {
     "id": "40785fbd",
     "text": "Good morning, Elizabeth \u2014 time to wake up \u2600\ufe0f",
-    "remind_at": "2026-07-30T09:00:00",
+    "remind_at": "2026-07-31T09:00:00",
     "repeat": "daily",
     "until": "2026-08-27",
-    "status": "sent",
+    "status": "pending",
     "created": "2026-07-30T01:06:58.806467-04:00"
   },
   {

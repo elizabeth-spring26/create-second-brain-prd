@@ -28,5 +28,17 @@ jobs:
           git config user.name "second-brain-bot"
           git config user.email "actions@github.com"
           git add Elizabeth-Brain/Memory/reminders.json
-          git diff --cached --quiet || git commit -m "Send due reminders"
-          git diff --cached --quiet || git push
+          # If there are staged changes, commit AND push. The previous version
+          # checked `git diff --cached --quiet` again before pushing, but after
+          # the commit nothing is staged, so that check passed and the push was
+          # skipped — the "sent" status never reached remote and reminders
+          # re-fired every run. Guard once, then do both.
+          if git diff --cached --quiet; then
+            echo "No reminder changes to commit."
+          else
+            git commit -m "Send due reminders"
+            # The bot also writes reminders.json via the GitHub API, so remote
+            # may have advanced since checkout. Rebase before pushing, and retry
+            # once, so the "sent" status reliably lands on remote.
+            git push || (git pull --rebase --autostash origin main && git push)
+          fi
