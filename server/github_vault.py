@@ -121,6 +121,31 @@ def parse_habits(habits_content):
     return habits
 
 
+def parse_action_items(note_content):
+    """Extract unchecked items from a synced Granola note's '## Action Items'
+    section. Returns list of strings; stops at the next '## ' heading."""
+    items = []
+    in_section = False
+    for line in note_content.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("## "):
+            in_section = stripped.lower().startswith("## action items")
+            continue
+        if in_section:
+            m = re.match(r"^- \[ \] (.+)$", stripped)
+            if m:
+                items.append(m.group(1).strip())
+    return items
+
+
+def parse_note_title(note_content, fallback):
+    """Pull `title:` out of a note's YAML frontmatter."""
+    for line in note_content.splitlines()[:10]:
+        if line.startswith("title:"):
+            return line.replace("title:", "").strip()
+    return fallback
+
+
 def append_task(task_text):
     """Add a task to today's daily log."""
     from datetime import datetime

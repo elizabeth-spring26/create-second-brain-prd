@@ -10,6 +10,7 @@ import anthropic
 from github_vault import (
     read_file, list_dir, append_task,
     get_today_log, parse_tasks, parse_habits,
+    parse_action_items, parse_note_title,
 )
 import reminder_core
 import telegram_bot
@@ -102,6 +103,41 @@ def api_therapy_recent():
         "affirmation": affirmation,
         "insights": insights,
     })
+
+
+GRANOLA_FOLDERS = ("generator", "therapy")  # mirrors the sync-granola skill's tracked folders
+
+
+@app.route("/api/followups")
+def api_followups():
+    """Open action items from recently synced Granola meeting notes, newest first.
+    Reads the vault directly — the notes get there via the sync-granola skill."""
+    limit = request.args.get("limit", default=5, type=int)
+
+    notes = []
+    for folder in GRANOLA_FOLDERS:
+        for f in list_dir(folder):
+            if f.endswith(".md") and not f.startswith("_"):
+                notes.append((f.replace(".md", ""), folder, f))
+
+    results = []
+    for note_date, folder, filename in sorted(notes, reverse=True):
+        if len(results) >= limit:
+            break
+        content, _ = read_file(f"{folder}/{filename}")
+        if not content:
+            continue
+        items = parse_action_items(content)
+        if not items:
+            continue
+        results.append({
+            "date": note_date,
+            "source": folder,
+            "title": parse_note_title(content, note_date),
+            "items": items,
+        })
+
+    return jsonify(results)
 
 
 @app.route("/api/chat", methods=["POST"])

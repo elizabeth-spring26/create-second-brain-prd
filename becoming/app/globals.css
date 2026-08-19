@@ -1,0 +1,195 @@
+@import "tailwindcss";
+
+/* next-themes writes class="dark" on <html>; drive Tailwind's dark: variant from it. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TOKENS — every color in this app resolves to one of these. No arbitrary hex.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --paper:    #fdfbf7; /* warm milk — page background */
+  --card:     #ffffff; /* card surfaces */
+  --ink:      #17151c; /* aubergine-black — primary text, all outlines */
+  --ink-soft: #6b6577; /* secondary text, labels, axis ticks */
+  --haze:     #ece7f2; /* dividers, gridlines, empty rings */
+  --iris:     #5b54d6; /* electric periwinkle — THE accent */
+  --sakura:   #f2a0b8; /* self-care, rest, sparkles, celebration */
+  --matcha:   #7fb08a; /* completion, streaks, on-track */
+  --amber:    #e0a33e; /* needs attention — the strongest negative signal there is */
+}
+
+.dark {
+  --paper:    #131118;
+  --card:     #1c1924;
+  --ink:      #f4f1f8;
+  --ink-soft: #9a93a8;
+  --haze:     #2c2836;
+  /* same hue, lightness lifted ~8% so they hold up on a dark ground */
+  --iris:     #7b74e6;
+  --sakura:   #f5b4c7;
+  --matcha:   #93be9c;
+  --amber:    #e8b45c;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-haze: var(--haze);
+  --color-iris: var(--iris);
+  --color-sakura: var(--sakura);
+  --color-matcha: var(--matcha);
+  --color-amber: var(--amber);
+
+  --font-display: var(--font-cabinet), ui-sans-serif, system-ui, sans-serif;
+  --font-reflective: var(--font-zodiak), ui-serif, Georgia, serif;
+  --font-sans: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
+
+  /* Type scale — 3.5 / 2.25 / 1.5 / 1.125 / 1 / 0.875 / 0.75 */
+  --text-display: 3.5rem;
+  --text-display--line-height: 1.05;
+  --text-display--letter-spacing: -0.03em;
+  --text-title: 2.25rem;
+  --text-title--line-height: 1.05;
+  --text-title--letter-spacing: -0.03em;
+  --text-heading: 1.5rem;
+  --text-heading--line-height: 1.2;
+  --text-heading--letter-spacing: -0.02em;
+  --text-subheading: 1.125rem;
+  --text-subheading--line-height: 1.4;
+  --text-body: 1rem;
+  --text-body--line-height: 1.6;
+  --text-caption: 0.875rem;
+  --text-caption--line-height: 1.5;
+  --text-eyebrow: 0.75rem;
+  --text-eyebrow--line-height: 1.4;
+
+  --radius-card: 20px;
+  --radius-control: 12px;
+
+  --ease-becoming: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BASE
+   ───────────────────────────────────────────────────────────────────────────── */
+
+html {
+  color-scheme: light;
+}
+.dark html,
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-satoshi), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Focus ring is always visible and never removed. */
+:focus-visible {
+  outline: 2px solid var(--iris);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--sakura);
+  color: var(--ink);
+}
+
+@layer components {
+  /* Eyebrow label — uppercase, tracked out, quiet. */
+  .eyebrow {
+    font-family: var(--font-satoshi), sans-serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.4;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--ink-soft);
+  }
+
+  /* Card — never nest one inside another. */
+  .card-surface {
+    background: var(--card);
+    border: 1px solid var(--haze);
+    border-radius: var(--radius-card);
+    padding: 24px;
+    box-shadow: 0 1px 2px rgb(23 21 28 / 0.04);
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: var(--radius-control);
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: opacity 200ms var(--ease-becoming);
+  }
+  .btn-primary:hover {
+    opacity: 0.88;
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--ink);
+    border-radius: var(--radius-control);
+    padding: 10px 20px;
+    font-weight: 500;
+    transition: background 200ms var(--ease-becoming);
+  }
+  .btn-secondary:hover {
+    background: color-mix(in oklab, var(--ink) 6%, transparent);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   MOTION — non-negotiable reduced-motion guard.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@keyframes petal-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+@keyframes ribbon-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+.petal-float {
+  animation: petal-float 3s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* Drop to opacity-only: the ribbon appears rather than draws. */
+  .ribbon-path {
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+    animation: none !important;
+  }
+  .petal-float {
+    animation: none !important;
+  }
+}

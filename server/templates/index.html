@@ -248,6 +248,36 @@
       transition: background 0.3s;
     }
     .habits-progress .pip.done { background: var(--green); }
+
+    /* Meeting follow-ups */
+    .followup-group { margin-bottom: 16px; }
+    .followup-group:last-child { margin-bottom: 0; }
+    .followup-head {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+    .followup-head .title { font-weight: 600; font-size: 0.9rem; }
+    .followup-tag {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 2px 7px;
+      border-radius: 99px;
+      background: var(--accent-light);
+      color: var(--accent);
+    }
+    .followup-head .when { font-size: 0.75rem; color: var(--muted); }
+    .followup-item {
+      display: flex;
+      gap: 8px;
+      font-size: 0.86rem;
+      line-height: 1.45;
+      padding: 3px 0 3px 2px;
+    }
+    .followup-item::before { content: "→"; color: var(--muted); flex-shrink: 0; }
   </style>
 </head>
 <body>
@@ -294,6 +324,14 @@
   <div class="card">
     <div class="card-title">Therapy Insights</div>
     <div class="insights" id="insightsList">
+      <div class="loading">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Meeting Follow-Ups -->
+  <div class="card full">
+    <div class="card-title">Meeting Follow-Ups</div>
+    <div id="followupsList">
       <div class="loading">Loading...</div>
     </div>
   </div>
@@ -417,6 +455,30 @@
     }
   }
 
+  // ── Load meeting follow-ups ────────────────────────────────────────────────
+
+  async function loadFollowups() {
+    const res = await fetch(`${API}/api/followups`);
+    const groups = await res.json();
+    const el = document.getElementById("followupsList");
+
+    if (!groups.length) {
+      el.innerHTML = '<div class="empty">No open follow-ups from recent meetings</div>';
+      return;
+    }
+
+    el.innerHTML = groups.map(g => `
+      <div class="followup-group">
+        <div class="followup-head">
+          <span class="followup-tag">${escHtml(g.source)}</span>
+          <span class="title">${escHtml(g.title)}</span>
+          <span class="when">${escHtml(g.date)}</span>
+        </div>
+        ${g.items.map(i => `<div class="followup-item"><span>${escHtml(i)}</span></div>`).join("")}
+      </div>
+    `).join("");
+  }
+
   // ── Add task ───────────────────────────────────────────────────────────────
 
   async function addTask() {
@@ -499,6 +561,7 @@
   loadToday();
   loadGoals();
   loadTherapy();
+  loadFollowups();
 </script>
 </body>
 </html>
