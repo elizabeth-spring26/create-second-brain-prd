@@ -1,0 +1,1 @@
+ALTER TABLE `sync_state` ADD `refresh_token` text;

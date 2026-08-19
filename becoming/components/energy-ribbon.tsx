@@ -99,7 +99,10 @@ export function EnergyRibbon({ points, className }: Props) {
     hasDrawn = true;
   }, [d]);
 
-  if (plotted.length === 0) {
+  // coords is empty until the container has been measured (width is 0 during
+  // SSR and the first paint), so gate on coords — not plotted — before reading
+  // from it.
+  if (coords.length === 0) {
     return (
       <div ref={wrapRef} className={className} style={{ height: HEIGHT }} aria-hidden="true" />
     );

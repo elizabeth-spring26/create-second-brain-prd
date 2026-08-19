@@ -1,0 +1,1 @@
+ALTER TABLE `settings` ADD `bed_goal` text;

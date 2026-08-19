@@ -43,3 +43,5 @@ next-env.d.ts
 # BECOMING local data
 data/*.db
 data/*.db-*
+
+.vercel
