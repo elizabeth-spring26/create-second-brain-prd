@@ -1,3 +1,4 @@
+import { Leaf } from "@/components/ghibli";
 import { cn } from "@/lib/utils";
 
 /** Shared primitives, styled from tokens only. */
@@ -57,7 +58,10 @@ export function PageHeader({
   return (
     <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="font-display text-title">{title}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="font-display text-title">{title}</h1>
+          <Leaf size={13} className="mb-1 shrink-0" />
+        </div>
         {subtitle ? (
           <p className="mt-2 font-reflective text-subheading italic text-ink-soft">{subtitle}</p>
         ) : null}

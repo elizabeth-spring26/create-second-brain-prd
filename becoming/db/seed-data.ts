@@ -5,10 +5,21 @@ import { DEFAULT_OFFER_CRITERIA } from "./schema/career";
  * is idempotent and matches on natural keys, so it never duplicates rows.
  */
 
-export const SEED_HABITS = [
+export type SeedHabit = {
+  name: string;
+  emoji: string;
+  direction: "build" | "break";
+  kind: "boolean" | "numeric" | "scale";
+  colorToken: string;
+  /** Shows on the Today screen. Only a few should be true. */
+  pinned?: boolean;
+};
+
+export const SEED_HABITS: SeedHabit[] = [
   // Build — the things to do more of. From her HABITS.md pillars.
   {
     name: "Gym / workout",
+    pinned: true,
     emoji: "🏋️",
     direction: "build" as const,
     kind: "boolean" as const,
@@ -39,6 +50,7 @@ export const SEED_HABITS = [
   // Build — drawn from the action items in her therapy sessions.
   {
     name: "Say the affirmation",
+    pinned: true,
     emoji: "🌸",
     direction: "build" as const,
     kind: "boolean" as const,
@@ -46,6 +58,7 @@ export const SEED_HABITS = [
   },
   {
     name: "Three things I'm grateful for",
+    pinned: true,
     emoji: "🕊️",
     direction: "build" as const,
     kind: "boolean" as const,
@@ -77,6 +90,7 @@ export const SEED_HABITS = [
   },
   {
     name: "Waking up late and drifting",
+    pinned: true,
     emoji: "☀️",
     direction: "break" as const,
     kind: "boolean" as const,

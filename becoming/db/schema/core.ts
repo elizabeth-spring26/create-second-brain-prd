@@ -55,6 +55,11 @@ export const habits = sqliteTable("habits", {
     .default("build"),
   colorToken: text("color_token").notNull().default("matcha"),
   sortOrder: integer("sort_order").notNull().default(0),
+  /**
+   * Only pinned habits appear on Today. The full set lives on /habits — the
+   * home screen is meant to be glanceable, not a complete inventory.
+   */
+  pinned: integer("pinned", { mode: "boolean" }).notNull().default(false),
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   archivedAt: integer("archived_at", { mode: "timestamp" }),
   createdAt: createdAt(),

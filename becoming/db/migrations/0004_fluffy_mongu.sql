@@ -1,0 +1,1 @@
+ALTER TABLE `habits` ADD `pinned` integer DEFAULT false NOT NULL;

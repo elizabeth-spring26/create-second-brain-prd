@@ -1,8 +1,8 @@
 "use client";
 
-import { Archive, Check, Pencil, Plus } from "lucide-react";
+import { Archive, Check, Pencil, Pin, Plus } from "lucide-react";
 import { useOptimistic, useState, useTransition } from "react";
-import { archiveHabit, createHabit, updateHabit } from "@/lib/actions/habits";
+import { archiveHabit, createHabit, setHabitPinned, updateHabit } from "@/lib/actions/habits";
 import { toggleHabit } from "@/lib/actions/daily";
 import { cn } from "@/lib/utils";
 
@@ -11,6 +11,7 @@ export type EditableHabit = {
   name: string;
   emoji: string | null;
   direction: "build" | "break";
+  pinned: boolean;
   loggedDates: string[];
   current: number;
   best: number;
@@ -104,6 +105,7 @@ function Row({
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(h.name);
   const [emoji, setEmoji] = useState(h.emoji ?? "");
+  const [pinned, setPinned] = useState(h.pinned);
 
   function save() {
     setEditing(false);
@@ -167,6 +169,20 @@ function Row({
             <p className="eyebrow">30d</p>
             <p className="font-mono text-subheading leading-none">{h.pct}%</p>
           </div>
+          <button
+            onClick={() => {
+              const next = !pinned;
+              setPinned(next);
+              startTransition(async () => void (await setHabitPinned(h.id, next)));
+            }}
+            aria-pressed={pinned}
+            aria-label={pinned ? `Unpin ${h.name} from Today` : `Pin ${h.name} to Today`}
+            title={pinned ? "Showing on Today" : "Pin to Today"}
+            className="transition-colors"
+            style={{ color: pinned ? "var(--sakura)" : "var(--ink-soft)" }}
+          >
+            <Pin size={14} fill={pinned ? "var(--sakura)" : "none"} />
+          </button>
           <button
             onClick={() => startTransition(async () => void (await archiveHabit(h.id)))}
             aria-label={`Archive ${h.name}`}

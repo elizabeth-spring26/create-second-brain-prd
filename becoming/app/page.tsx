@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { CheckinCard } from "@/components/checkin-card";
 import { HabitRow, type HabitItem } from "@/components/habit-row";
 import { WeekBoard, type Task } from "@/components/week-board";
@@ -26,13 +27,19 @@ export default async function TodayPage() {
   ]);
 
   const loggedIds = new Set(todaysLogs.map((l) => l.habitId));
-  const habitItems: HabitItem[] = habits.map((h) => ({
+  const toItem = (h: (typeof habits)[number]): HabitItem => ({
     id: h.id,
     name: h.name,
     emoji: h.emoji,
     direction: h.direction,
     logged: loggedIds.has(h.id),
-  }));
+  });
+
+  // Today shows only the pinned few. Falls back to the first four so the
+  // screen is never empty before anything has been pinned.
+  const pinned = habits.filter((h) => h.pinned);
+  const shown = (pinned.length > 0 ? pinned : habits.slice(0, 4)).map(toItem);
+  const hiddenCount = habits.length - shown.length;
 
   const affirmation = affirmationFor(logDate);
   const reflection = reflectionFor(logDate);
@@ -56,7 +63,7 @@ export default async function TodayPage() {
   const byDay: Record<string, Task[]> = {};
   for (const [d, list] of week.byDay) byDay[d] = list.map(strip);
 
-  const done = habitItems.filter((h) =>
+  const done = shown.filter((h) =>
     h.direction === "break" ? !h.logged : h.logged,
   ).length;
 
@@ -120,11 +127,19 @@ export default async function TodayPage() {
         <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
           <h2 className="font-display text-heading">Today&rsquo;s habits</h2>
           <span className="cel-pill font-mono">
-            {done}/{habitItems.length}
+            {done}/{shown.length}
           </span>
         </div>
         <div className="card-cel">
-          <HabitRow habits={habitItems} logDate={logDate} />
+          <HabitRow habits={shown} logDate={logDate} />
+          {hiddenCount > 0 ? (
+            <p className="mt-5 text-[0.75rem] text-ink-soft">
+              <Link href="/habits" className="underline underline-offset-2 hover:text-ink">
+                {hiddenCount} more on the habits page
+              </Link>{" "}
+              — pin the ones you want here.
+            </p>
+          ) : null}
         </div>
       </section>
 

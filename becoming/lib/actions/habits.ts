@@ -61,6 +61,17 @@ export async function archiveHabit(id: string) {
   return { ok: true as const };
 }
 
+/** Pinned habits are the few that show on Today. */
+export async function setHabitPinned(id: string, pinned: boolean) {
+  await db
+    .update(habits)
+    .set({ pinned, updatedAt: new Date() })
+    .where(eq(habits.id, id));
+  revalidatePath("/habits");
+  revalidatePath("/");
+  return { ok: true as const };
+}
+
 export async function restoreHabit(id: string) {
   await db
     .update(habits)

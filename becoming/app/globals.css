@@ -7,29 +7,44 @@
    TOKENS — every color in this app resolves to one of these. No arbitrary hex.
    ───────────────────────────────────────────────────────────────────────────── */
 
+/*
+ * Studio Ghibli by way of a shoujo panel: sun-warmed paper, meadow greens,
+ * a wide sky blue, and dusty rose. The ink is a soft plum-charcoal rather
+ * than black — Ghibli outlines are painted, not printed, and true black
+ * makes the whole page feel like a comic instead of a watercolour.
+ */
 :root {
-  --paper:    #fdfbf7; /* warm milk — page background */
-  --card:     #ffffff; /* card surfaces */
-  --ink:      #17151c; /* aubergine-black — primary text, all outlines */
-  --ink-soft: #6b6577; /* secondary text, labels, axis ticks */
-  --haze:     #ece7f2; /* dividers, gridlines, empty rings */
-  --iris:     #5b54d6; /* electric periwinkle — THE accent */
-  --sakura:   #f2a0b8; /* self-care, rest, sparkles, celebration */
-  --matcha:   #7fb08a; /* completion, streaks, on-track */
-  --amber:    #e0a33e; /* needs attention — the strongest negative signal there is */
+  --paper:    #fdf7f0; /* sun-warmed cream — page background */
+  --card:     #fffdfa; /* card surfaces */
+  --ink:      #2f2530; /* soft plum-charcoal — text and every outline */
+  --ink-soft: #7d7079; /* secondary text, labels, axis ticks */
+  --haze:     #ece0e2; /* dividers, gridlines, empty rings */
+  --iris:     #6f86cf; /* Ghibli sky blue — THE accent */
+  --sakura:   #f0a4bb; /* dusty rose — self-care, rest, celebration */
+  --matcha:   #86b184; /* meadow green — completion, streaks, on-track */
+  --amber:    #e0ac5c; /* soft gold — needs attention. never failure. */
+
+  /* Painterly extras, used sparingly for washes and skies. */
+  --sky:      #cfe0f2;
+  --meadow:   #dcead4;
+  --blush:    #fbe6ea;
 }
 
 .dark {
-  --paper:    #131118;
-  --card:     #1c1924;
-  --ink:      #f4f1f8;
-  --ink-soft: #9a93a8;
-  --haze:     #2c2836;
-  /* same hue, lightness lifted ~8% so they hold up on a dark ground */
-  --iris:     #7b74e6;
-  --sakura:   #f5b4c7;
-  --matcha:   #93be9c;
-  --amber:    #e8b45c;
+  /* Dusk rather than a void — a Ghibli night is blue, not black. */
+  --paper:    #191722;
+  --card:     #23202d;
+  --ink:      #f6f0f2;
+  --ink-soft: #a79aa4;
+  --haze:     #342f3e;
+  --iris:     #8fa3e3;
+  --sakura:   #f4b8ca;
+  --matcha:   #9cc39a;
+  --amber:    #e8bd76;
+
+  --sky:      #2b3550;
+  --meadow:   #2c3b30;
+  --blush:    #3a2b33;
 }
 
 @theme inline {
@@ -120,38 +135,58 @@ body {
     color: var(--ink-soft);
   }
 
-  /* Card — never nest one inside another. */
+  /* Card — never nest one inside another.
+     Cel-shaded: a painted outline and a soft offset shadow, so every page
+     inherits the treatment without being rewritten. */
   .card-surface {
     background: var(--card);
-    border: 1px solid var(--haze);
-    border-radius: var(--radius-card);
-    padding: 24px;
-    box-shadow: 0 1px 2px rgb(23 21 28 / 0.04);
+    border: 1.5px solid var(--ink);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 3px 3px 0 color-mix(in oklab, var(--ink) 82%, transparent);
   }
 
+  /* Buttons press down like a sticker. */
   .btn-primary {
     background: var(--ink);
     color: var(--paper);
-    border-radius: var(--radius-control);
-    padding: 10px 20px;
-    font-weight: 500;
-    transition: opacity 200ms var(--ease-becoming);
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    padding: 9px 20px;
+    font-weight: 700;
+    box-shadow: 2px 2px 0 color-mix(in oklab, var(--ink) 40%, transparent);
+    transition:
+      transform 160ms var(--ease-bounce),
+      box-shadow 160ms var(--ease-bounce);
   }
   .btn-primary:hover {
-    opacity: 0.88;
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 color-mix(in oklab, var(--ink) 45%, transparent);
+  }
+  .btn-primary:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 color-mix(in oklab, var(--ink) 40%, transparent);
   }
 
   .btn-secondary {
-    background: transparent;
+    background: var(--card);
     color: var(--ink);
-    border: 1px solid var(--ink);
-    border-radius: var(--radius-control);
-    padding: 10px 20px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    padding: 9px 20px;
     font-weight: 500;
-    transition: background 200ms var(--ease-becoming);
+    box-shadow: 2px 2px 0 color-mix(in oklab, var(--ink) 28%, transparent);
+    transition:
+      transform 160ms var(--ease-bounce),
+      box-shadow 160ms var(--ease-bounce);
   }
   .btn-secondary:hover {
-    background: color-mix(in oklab, var(--ink) 6%, transparent);
+    transform: translate(-1px, -1px);
+    background: var(--blush);
+  }
+  .btn-secondary:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 color-mix(in oklab, var(--ink) 28%, transparent);
   }
 }
 
@@ -211,6 +246,28 @@ body {
   .btn-cel:active {
     transform: translate(1px, 1px);
     box-shadow: 1px 1px 0 var(--ink);
+  }
+
+  /* A wide sky behind the top of the page. Painted, not printed: a soft
+     vertical wash that fades into the paper with no visible edge. */
+  .sky-wash {
+    position: fixed;
+    inset: 0 0 auto 0;
+    height: 320px;
+    pointer-events: none;
+    z-index: -1;
+    background:
+      radial-gradient(120% 90% at 18% -10%, var(--blush) 0%, transparent 55%),
+      radial-gradient(120% 100% at 82% -20%, var(--sky) 0%, transparent 60%),
+      linear-gradient(to bottom, var(--meadow) 0%, transparent 70%);
+    opacity: 0.5;
+  }
+
+  /* Soft rounded cloud, drifting. Three overlapping circles, no outline. */
+  .cloud {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0.5;
   }
 
   /* Speed lines behind a hero moment — three quick strokes, nothing more. */

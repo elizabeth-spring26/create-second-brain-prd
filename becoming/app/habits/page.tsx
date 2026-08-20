@@ -31,6 +31,7 @@ export default async function HabitsPage() {
       name: h.name,
       emoji: h.emoji,
       direction: h.direction,
+      pinned: h.pinned,
       loggedDates: d,
       current: currentStreak(h.direction, d, today),
       best: bestStreak(h.direction, d, since, today),

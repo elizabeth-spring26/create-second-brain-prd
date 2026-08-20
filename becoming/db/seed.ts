@@ -49,9 +49,23 @@ async function main() {
       skipped++;
       continue;
     }
-    await db.insert(habits).values({ ...h, sortOrder: i });
+    await db.insert(habits).values({ ...h, sortOrder: i, pinned: Boolean(h.pinned) });
     console.log(`habit              + ${h.name} (${h.direction})`);
     created++;
+  }
+
+  // Backfill pins for habits that already existed before `pinned` was added.
+  // Only runs when nothing is pinned, so it never overrides her own choices.
+  const anyPinned = (await db.select().from(habits)).some((h) => h.pinned);
+  if (!anyPinned) {
+    const wanted = SEED_HABITS.filter((h) => h.pinned).map((h) => h.name);
+    for (const name of wanted) {
+      await db.update(habits).set({ pinned: true }).where(eq(habits.name, name));
+    }
+    if (wanted.length > 0) {
+      console.log(`habits             ~ pinned ${wanted.length} to Today`);
+      created++;
+    }
   }
 
   // ── offer criteria ─────────────────────────────────────────────────────────
