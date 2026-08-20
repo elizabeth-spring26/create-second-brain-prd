@@ -10,7 +10,7 @@ import {
   getHabitLogsForDate,
   getSettings,
 } from "@/lib/queries/daily";
-import { getWeekTasks } from "@/lib/queries/tasks";
+import { getWeekTasks, getWeeklyGoals } from "@/lib/queries/tasks";
 
 export const dynamic = "force-dynamic";
 
@@ -18,12 +18,13 @@ export default async function TodayPage() {
   const logDate = todayISO();
   const hour = easternHour();
 
-  const [settings, checkin, habits, todaysLogs, week] = await Promise.all([
+  const [settings, checkin, habits, todaysLogs, week, weeklyGoals] = await Promise.all([
     getSettings(),
     getCheckin(logDate),
     getActiveHabits(),
     getHabitLogsForDate(logDate),
     getWeekTasks(logDate),
+    getWeeklyGoals(logDate),
   ]);
 
   const loggedIds = new Set(todaysLogs.map((l) => l.habitId));
@@ -70,7 +71,7 @@ export default async function TodayPage() {
   return (
     <div className="max-w-[900px]">
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <div className="relative speed-lines mb-10">
+      <div className="mb-10">
         <p className="eyebrow mb-2">
           {hour < 12 ? "Good morning" : hour < 18 ? "Afternoon" : "Evening"}, Elizabeth
         </p>
@@ -118,6 +119,7 @@ export default async function TodayPage() {
           byDay={byDay}
           undated={week.undated.map(strip)}
           laterThisMonth={week.laterThisMonth.map(strip)}
+          weeklyGoals={weeklyGoals.map(strip)}
           todayISO={logDate}
         />
       </section>

@@ -8,6 +8,7 @@ import { Wordmark } from "@/components/wordmark";
 import { APP_NAME } from "@/lib/config";
 import { fontVariables } from "@/lib/fonts";
 import { getRibbonPoints } from "@/lib/queries/daily";
+import { getMonthlyGoals } from "@/lib/queries/reflect";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,7 +17,13 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const points = await getRibbonPoints(30);
+  const [points, goals] = await Promise.all([getRibbonPoints(30), getMonthlyGoals()]);
+
+  const sidebarGoals = goals.map((g) => ({
+    id: g.id,
+    title: g.title,
+    done: g.status === "hit",
+  }));
 
   return (
     <html lang="en" suppressHydrationWarning className={fontVariables}>
@@ -37,8 +44,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <EnergyRibbon points={points} className="mt-4" />
 
             <div className="flex gap-12 pb-28 pt-10 lg:pb-16">
-              <aside className="hidden w-[160px] shrink-0 lg:block">
-                <SideRail />
+              <aside className="hidden w-[190px] shrink-0 lg:block">
+                <SideRail monthlyGoals={sidebarGoals} />
               </aside>
               <main className="min-w-0 flex-1">{children}</main>
             </div>

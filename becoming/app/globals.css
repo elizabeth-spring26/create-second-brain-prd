@@ -270,19 +270,6 @@ body {
     opacity: 0.5;
   }
 
-  /* Speed lines behind a hero moment — three quick strokes, nothing more. */
-  .speed-lines::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background-image:
-      linear-gradient(90deg, transparent 0 6%, var(--haze) 6% 6.4%, transparent 6.4%),
-      linear-gradient(90deg, transparent 0 11%, var(--haze) 11% 11.3%, transparent 11.3%),
-      linear-gradient(90deg, transparent 0 15%, var(--haze) 15% 15.2%, transparent 15.2%);
-    opacity: 0.9;
-  }
-
   /* Today's column in the week board. */
   .day-today {
     border-color: var(--iris);

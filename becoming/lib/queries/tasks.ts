@@ -41,9 +41,12 @@ export async function getWeekTasks(anchor?: string) {
     .select()
     .from(tasks)
     .where(
-      or(
-        and(gte(tasks.dueDate, floor), lte(tasks.dueDate, ceiling)),
-        isNull(tasks.dueDate),
+      and(
+        eq(tasks.scope, "task"),
+        or(
+          and(gte(tasks.dueDate, floor), lte(tasks.dueDate, ceiling)),
+          isNull(tasks.dueDate),
+        ),
       ),
     )
     .orderBy(tasks.sortOrder, tasks.createdAt);
@@ -66,6 +69,16 @@ export async function getWeekTasks(anchor?: string) {
 
   laterThisMonth.sort((a, b) => (a.dueDate ?? "").localeCompare(b.dueDate ?? ""));
   return { days, byDay, undated, laterThisMonth, monthEnd: ceiling };
+}
+
+/** Intentions for this week — same checkbox, separate bucket from dated tasks. */
+export async function getWeeklyGoals(anchor?: string) {
+  const week = weekStartISO(anchor ?? todayISO());
+  return db
+    .select()
+    .from(tasks)
+    .where(and(eq(tasks.scope, "weekly_goal"), eq(tasks.periodKey, week)))
+    .orderBy(tasks.sortOrder, tasks.createdAt);
 }
 
 export async function getOpenTaskCount() {

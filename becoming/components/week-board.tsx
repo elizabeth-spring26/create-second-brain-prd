@@ -2,7 +2,14 @@
 
 import { Plus, X } from "lucide-react";
 import { useOptimistic, useState, useTransition } from "react";
-import { addTask, deleteTask, importTasks, toggleTask } from "@/lib/actions/tasks";
+import { Leaf } from "@/components/ghibli";
+import {
+  addTask,
+  addWeeklyGoal,
+  deleteTask,
+  importTasks,
+  toggleTask,
+} from "@/lib/actions/tasks";
 import { cn } from "@/lib/utils";
 
 export type Task = {
@@ -20,8 +27,13 @@ type Props = {
   undated: Task[];
   /** Due after Sunday but still inside this month. Nothing older is passed in. */
   laterThisMonth: Task[];
+  /** Intentions for the week, not dated items. */
+  weeklyGoals: Task[];
   todayISO: string;
 };
+
+/** Matches how many rows fit a day column before it grows. */
+const GOAL_PREVIEW = 4;
 
 const DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -101,13 +113,26 @@ function TaskLine({
   );
 }
 
-export function WeekBoard({ days, byDay, undated, laterThisMonth, todayISO }: Props) {
+export function WeekBoard({
+  days,
+  byDay,
+  undated,
+  laterThisMonth,
+  weeklyGoals,
+  todayISO,
+}: Props) {
   const [, startTransition] = useTransition();
   const [adding, setAdding] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [importing, setImporting] = useState<string | null>(null);
+  const [goalsExpanded, setGoalsExpanded] = useState(false);
 
-  const all = [...Object.values(byDay).flat(), ...undated, ...laterThisMonth];
+  const all = [
+    ...Object.values(byDay).flat(),
+    ...undated,
+    ...laterThisMonth,
+    ...weeklyGoals,
+  ];
   const [optimistic, setOptimistic] = useOptimistic(
     all,
     (state: Task[], id: string) =>
@@ -133,6 +158,16 @@ export function WeekBoard({ days, byDay, undated, laterThisMonth, todayISO }: Pr
     setAdding(null);
     startTransition(async () => {
       await addTask({ title, dueDate: day });
+    });
+  }
+
+  function submitGoal() {
+    const title = draft.trim();
+    if (!title) return;
+    setDraft("");
+    setAdding(null);
+    startTransition(async () => {
+      await addWeeklyGoal({ title });
     });
   }
 
@@ -216,6 +251,70 @@ export function WeekBoard({ days, byDay, undated, laterThisMonth, todayISO }: Pr
             </div>
           );
         })}
+
+        {/* Goals for the week — same card, same checkbox, marked as intent
+            rather than a dated to-do by the leaf and the meadow tint. */}
+        <div
+          className="card-cel flex min-h-[128px] flex-col"
+          style={{ background: "color-mix(in oklab, var(--matcha) 12%, var(--card))" }}
+        >
+          <div className="mb-3 flex items-baseline justify-between gap-2">
+            <span className="flex items-center gap-1.5 font-display text-[0.95rem] font-bold">
+              <Leaf size={12} />
+              Goals
+            </span>
+            <span className="font-mono text-[0.7rem] text-ink-soft">
+              {weeklyGoals.filter((g) => doneOf(g.id)).length}/{weeklyGoals.length}
+            </span>
+          </div>
+
+          <ul className="flex-1 space-y-2">
+            {(goalsExpanded ? weeklyGoals : weeklyGoals.slice(0, GOAL_PREVIEW))
+              .map(withState)
+              .map((t) => (
+                <TaskLine key={t.id} t={t} onToggle={onToggle} onDelete={onDelete} />
+              ))}
+          </ul>
+
+          {weeklyGoals.length > GOAL_PREVIEW && !goalsExpanded ? (
+            <button
+              onClick={() => setGoalsExpanded(true)}
+              className="mt-2 text-left text-[0.7rem] text-ink-soft transition-colors hover:text-ink"
+            >
+              {weeklyGoals.length - GOAL_PREVIEW} more
+            </button>
+          ) : null}
+
+          {adding === "goal" ? (
+            <input
+              autoFocus
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              onBlur={submitGoal}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") submitGoal();
+                if (e.key === "Escape") {
+                  setDraft("");
+                  setAdding(null);
+                }
+              }}
+              placeholder="What matters this week?"
+              className="mt-2 w-full rounded-[8px] border-[1.5px] border-ink bg-transparent px-2 py-1 text-[0.8rem]"
+            />
+          ) : (
+            <button
+              onClick={() => {
+                setDraft("");
+                setAdding("goal");
+                setGoalsExpanded(true);
+              }}
+              aria-label="Add a weekly goal"
+              className="mt-2 flex items-center gap-1 text-[0.7rem] text-ink-soft transition-colors hover:text-ink"
+            >
+              <Plus size={11} /> Add
+            </button>
+          )}
+        </div>
 
         {/* Belongs to the week, but not to any particular day. */}
         <div className="card-cel flex min-h-[128px] flex-col">

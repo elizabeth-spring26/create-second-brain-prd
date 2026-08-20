@@ -29,6 +29,26 @@ export async function addTask(input: z.infer<typeof NewTask>) {
   return { ok: true as const };
 }
 
+const NewGoal = z.object({
+  title: z.string().min(1).max(300),
+  /** Monday of the target week; defaults to this week. */
+  weekStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullish(),
+});
+
+export async function addWeeklyGoal(input: z.infer<typeof NewGoal>) {
+  const parsed = NewGoal.safeParse(input);
+  if (!parsed.success) return { ok: false as const, error: "Give the goal a name." };
+
+  await db.insert(tasks).values({
+    title: parsed.data.title,
+    scope: "weekly_goal",
+    periodKey: parsed.data.weekStart ?? weekStartISO(),
+    source: "manual",
+  });
+  revalidatePath("/");
+  return { ok: true as const };
+}
+
 export async function toggleTask(id: string) {
   const rows = await db.select().from(tasks).where(eq(tasks.id, id)).limit(1);
   const t = rows[0];
