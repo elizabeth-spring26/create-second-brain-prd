@@ -1,3 +1,4 @@
+import { CanvasControls } from "@/components/canvas-controls";
 import { SyncButton } from "@/components/sync-button";
 import { Card, Empty, Eyebrow, PageHeader, Stat } from "@/components/ui";
 import { canvasConfigured } from "@/lib/canvas/client";
@@ -6,6 +7,7 @@ import { easternTime, shortDate, toLogDate } from "@/lib/dates";
 import { googleConfigured } from "@/lib/google/client";
 import { granolaConfigured } from "@/lib/granola/client";
 import { getSettings } from "@/lib/queries/daily";
+import { getCoursesWithCounts } from "@/lib/queries/school";
 
 export const dynamic = "force-dynamic";
 
@@ -27,8 +29,9 @@ export default async function SettingsPage({
   searchParams: Promise<{ google?: string }>;
 }) {
   const { google } = await searchParams;
-  const [settings, canvasState, granolaState, googleState] = await Promise.all([
+  const [settings, courseRows, canvasState, granolaState, googleState] = await Promise.all([
     getSettings(),
+    getCoursesWithCounts(),
     getSyncState("canvas"),
     getSyncState("granola"),
     getSyncState("google_calendar"),
@@ -60,6 +63,11 @@ export default async function SettingsPage({
         ) : (
           <Empty>No settings row yet — run the seed.</Empty>
         )}
+      </Card>
+
+      <Card className="mb-8">
+        <Eyebrow className="mb-5">Canvas</Eyebrow>
+        <CanvasControls showCanvas={Boolean(settings?.showCanvas)} courses={courseRows} />
       </Card>
 
       <Card className="mb-8">

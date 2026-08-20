@@ -11,24 +11,73 @@ import {
   normalizeFolder,
 } from "./client";
 
-/** Extract "## Action Items" style follow-ups from a Granola summary. */
+const MAX_FOLLOWUP_CHARS = 90;
+
+/** Trim to the first clause and cap the length — these are list items, not prose. */
+function condense(s: string): string {
+  let t = s
+    .replace(/\*\*/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/[.;]$/, "");
+
+  // Drop the trailing explanation after an em dash or parenthetical.
+  t = t.split(/\s+[—–]\s+/)[0].replace(/\s*\([^)]*\)\s*$/, "").trim();
+
+  if (t.length > MAX_FOLLOWUP_CHARS) {
+    const cut = t.slice(0, MAX_FOLLOWUP_CHARS);
+    const lastSpace = cut.lastIndexOf(" ");
+    t = `${(lastSpace > 40 ? cut.slice(0, lastSpace) : cut).trim()}…`;
+  }
+  return t;
+}
+
+/**
+ * Extract the follow-ups from a Granola summary, short enough to scan.
+ *
+ * Granola writes next steps as a bold headline bullet followed by an indented
+ * paragraph of detail. The headline is the actionable part, so when bold
+ * bullets exist we take only those and ignore the prose underneath — that
+ * detail is what made these unreadably long.
+ */
 export function parseFollowUps(markdown: string | null): string[] {
   if (!markdown) return [];
   const lines = markdown.split("\n");
-  const out: string[] = [];
+  const bold: string[] = [];
+  const plain: string[] = [];
   let inSection = false;
 
   for (const raw of lines) {
     const line = raw.trim();
     if (/^#{1,6}\s/.test(line)) {
-      inSection = /next steps|action items|follow[- ]?ups?/i.test(line);
+      inSection = /next steps|action items|follow[- ]?ups?|to-?dos?/i.test(line);
       continue;
     }
     if (!inSection) continue;
 
-    // Granola renders next steps as bold bullets: "- **Do the thing**"
-    const m = line.match(/^[-*]\s+\*\*(.+?)\*\*\s*$/) ?? line.match(/^[-*]\s+(.{4,})$/);
-    if (m) out.push(m[1].trim());
+    const b = line.match(/^[-*]\s+\*\*(.+?)\*\*\s*$/);
+    if (b) {
+      bold.push(condense(b[1]));
+      continue;
+    }
+    const p = line.match(/^[-*]\s+(.{4,})$/);
+    if (p) plain.push(condense(p[1]));
+  }
+
+  const chosen = bold.length > 0 ? bold : plain;
+  return [...new Set(chosen)].filter((s) => s.length > 3).slice(0, 6);
+}
+
+/** First few key bullets of a summary, for a compact meeting card. */
+export function summarize(markdown: string | null, max = 3): string[] {
+  if (!markdown) return [];
+  const out: string[] = [];
+  for (const raw of markdown.split("\n")) {
+    const line = raw.trim();
+    if (/next steps|action items/i.test(line)) break;
+    const m = line.match(/^[-*]\s+(.{8,})$/);
+    if (m) out.push(condense(m[1]));
+    if (out.length >= max) break;
   }
   return out;
 }

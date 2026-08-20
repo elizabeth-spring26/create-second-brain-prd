@@ -156,6 +156,84 @@ body {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
+   ANIME LAYER — cel-shaded fills, confident ink outlines, one soft moment.
+   The layout stays austere; only the details get sweet.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+@layer components {
+  /* Cel-shaded card: a real 1.5px ink outline and a hard offset shadow, the
+     way a cel sits on its background. No blur, no gradient. */
+  .card-cel {
+    background: var(--card);
+    border: 1.5px solid var(--ink);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 3px 3px 0 var(--ink);
+    transition:
+      transform 200ms var(--ease-bounce),
+      box-shadow 200ms var(--ease-bounce);
+  }
+  .card-cel:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  /* Sticker-ish pill for tags and day labels. */
+  .cel-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.5;
+    background: var(--card);
+  }
+
+  .btn-cel {
+    background: var(--sakura);
+    color: var(--ink);
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-weight: 700;
+    box-shadow: 2px 2px 0 var(--ink);
+    transition:
+      transform 160ms var(--ease-bounce),
+      box-shadow 160ms var(--ease-bounce);
+  }
+  .btn-cel:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+  .btn-cel:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+
+  /* Speed lines behind a hero moment — three quick strokes, nothing more. */
+  .speed-lines::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(90deg, transparent 0 6%, var(--haze) 6% 6.4%, transparent 6.4%),
+      linear-gradient(90deg, transparent 0 11%, var(--haze) 11% 11.3%, transparent 11.3%),
+      linear-gradient(90deg, transparent 0 15%, var(--haze) 15% 15.2%, transparent 15.2%);
+    opacity: 0.9;
+  }
+
+  /* Today's column in the week board. */
+  .day-today {
+    border-color: var(--iris);
+    box-shadow: 3px 3px 0 var(--iris);
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
    MOTION — non-negotiable reduced-motion guard.
    ───────────────────────────────────────────────────────────────────────────── */
 

@@ -5,3 +5,4 @@ export * from "./career";
 export * from "./work";
 export * from "./calendar";
 export * from "./sync";
+export * from "./tasks";

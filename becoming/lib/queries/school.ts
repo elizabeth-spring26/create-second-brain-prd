@@ -6,6 +6,40 @@ import { parseFollowUps } from "@/lib/granola/sync";
 
 export type AssignmentBucket = "overdue" | "today" | "week" | "later" | "done";
 
+/** Course list with assignment counts, for the settings controls. */
+export async function getCoursesWithCounts() {
+  const rows = await db
+    .select({
+      id: courses.id,
+      name: courses.name,
+      term: courses.term,
+      isHidden: courses.isHidden,
+      assignmentId: assignments.id,
+    })
+    .from(courses)
+    .leftJoin(assignments, eq(assignments.courseId, courses.id));
+
+  const map = new Map<
+    string,
+    { id: string; name: string; term: string | null; isHidden: boolean; count: number }
+  >();
+  for (const r of rows) {
+    const existing = map.get(r.id);
+    if (existing) {
+      if (r.assignmentId) existing.count++;
+    } else {
+      map.set(r.id, {
+        id: r.id,
+        name: r.name,
+        term: r.term,
+        isHidden: r.isHidden,
+        count: r.assignmentId ? 1 : 0,
+      });
+    }
+  }
+  return [...map.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export async function getAssignments() {
   const rows = await db
     .select({
@@ -22,6 +56,7 @@ export async function getAssignments() {
       courseName: courses.name,
       courseCode: courses.code,
       courseColor: courses.colorToken,
+      courseHidden: courses.isHidden,
     })
     .from(assignments)
     .leftJoin(courses, eq(assignments.courseId, courses.id))

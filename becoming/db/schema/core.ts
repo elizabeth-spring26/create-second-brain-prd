@@ -30,6 +30,11 @@ export const settings = sqliteTable("settings", {
   bedGoal: text("bed_goal"),
   sleepGoalHours: real("sleep_goal_hours"),
   energyGoal: integer("energy_goal"),
+  /**
+   * Canvas is off by default: last semester's assignments are noise until the
+   * new schedule starts. Flip this on /settings when term begins.
+   */
+  showCanvas: integer("show_canvas", { mode: "boolean" }).notNull().default(false),
   onboardedAt: integer("onboarded_at", { mode: "timestamp" }),
   createdAt: createdAt(),
   updatedAt: updatedAt(),

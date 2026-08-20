@@ -36,6 +36,36 @@ export const SEED_HABITS = [
     colorToken: "matcha",
   },
 
+  // Build — drawn from the action items in her therapy sessions.
+  {
+    name: "Say the affirmation",
+    emoji: "🌸",
+    direction: "build" as const,
+    kind: "boolean" as const,
+    colorToken: "matcha",
+  },
+  {
+    name: "Three things I'm grateful for",
+    emoji: "🕊️",
+    direction: "build" as const,
+    kind: "boolean" as const,
+    colorToken: "matcha",
+  },
+  {
+    name: "Write down one accomplishment",
+    emoji: "✍️",
+    direction: "build" as const,
+    kind: "boolean" as const,
+    colorToken: "matcha",
+  },
+  {
+    name: "Mindful walk",
+    emoji: "🍃",
+    direction: "build" as const,
+    kind: "boolean" as const,
+    colorToken: "matcha",
+  },
+
   // Break — "what you're letting go of". Named as the thing being released, and
   // measured as clean days counted up. Slips are never tallied.
   {
@@ -48,6 +78,20 @@ export const SEED_HABITS = [
   {
     name: "Waking up late and drifting",
     emoji: "☀️",
+    direction: "break" as const,
+    kind: "boolean" as const,
+    colorToken: "sakura",
+  },
+  {
+    name: "Over-explaining and hedging",
+    emoji: "💬",
+    direction: "break" as const,
+    kind: "boolean" as const,
+    colorToken: "sakura",
+  },
+  {
+    name: "Complaining instead of solving",
+    emoji: "🌀",
     direction: "break" as const,
     kind: "boolean" as const,
     colorToken: "sakura",
