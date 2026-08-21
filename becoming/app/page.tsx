@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CheckinCard } from "@/components/checkin-card";
 import { HabitRow, type HabitItem } from "@/components/habit-row";
+import { MonthlyGoalsList } from "@/components/monthly-goals";
 import { WeekBoard, type Task } from "@/components/week-board";
 import { affirmationFor, reflectionFor } from "@/lib/affirmations";
 import { easternHour, prettyDate, todayISO } from "@/lib/dates";
@@ -10,6 +11,7 @@ import {
   getHabitLogsForDate,
   getSettings,
 } from "@/lib/queries/daily";
+import { getMonthlyGoals } from "@/lib/queries/reflect";
 import { getWeekTasks, getWeeklyGoals } from "@/lib/queries/tasks";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +28,13 @@ export default async function TodayPage() {
     getWeekTasks(logDate),
     getWeeklyGoals(logDate),
   ]);
+
+  const monthGoals = await getMonthlyGoals();
+  const sidebarGoals = monthGoals.map((g) => ({
+    id: g.id,
+    title: g.title,
+    done: g.status === "hit",
+  }));
 
   const loggedIds = new Set(todaysLogs.map((l) => l.habitId));
   const toItem = (h: (typeof habits)[number]): HabitItem => ({
@@ -122,6 +131,15 @@ export default async function TodayPage() {
           weeklyGoals={weeklyGoals.map(strip)}
           todayISO={logDate}
         />
+      </section>
+
+      {/* Monthly goals live in the left rail, which is hidden below 1024px —
+          this card makes them reachable on a narrow window or a phone. */}
+      <section className="mb-12 lg:hidden">
+        <h2 className="font-display text-heading mb-4">Monthly goals</h2>
+        <div className="card-cel">
+          <MonthlyGoalsList goals={sidebarGoals} />
+        </div>
       </section>
 
       {/* ── Habits ───────────────────────────────────────────────────────── */}
