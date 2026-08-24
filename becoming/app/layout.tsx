@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { EnergyRibbon } from "@/components/energy-ribbon";
 import { Cloud, Hills } from "@/components/ghibli";
 import { BottomTabs, SideRail } from "@/components/nav";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -7,7 +6,6 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Wordmark } from "@/components/wordmark";
 import { APP_NAME } from "@/lib/config";
 import { fontVariables } from "@/lib/fonts";
-import { getRibbonPoints } from "@/lib/queries/daily";
 import { getMonthlyGoals } from "@/lib/queries/reflect";
 import "./globals.css";
 
@@ -17,7 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [points, goals] = await Promise.all([getRibbonPoints(30), getMonthlyGoals()]);
+  const goals = await getMonthlyGoals();
 
   const sidebarGoals = goals.map((g) => ({
     id: g.id,
@@ -39,9 +37,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <Wordmark className="text-subheading" />
               <ThemeToggle />
             </header>
-
-            {/* The Energy Ribbon sits under the header on every route. */}
-            <EnergyRibbon points={points} className="mt-4" />
 
             <div className="flex gap-12 pb-28 pt-10 lg:pb-16">
               <aside className="hidden w-[190px] shrink-0 lg:block">

@@ -108,7 +108,17 @@ export function CheckinCard({ logDate, initial, defaultMode, bedGoal, wakeGoal }
   );
   const [moodWord, setMoodWord] = useState(initial?.moodWord ?? "");
   const [drain, setDrain] = useState(initial?.drain ?? "");
-  const [gratitude, setGratitude] = useState(initial?.gratitude ?? "");
+  // Stored as one text column, one gratitude per line. Always keeps at least
+  // three empty rows so there's somewhere to put the next one.
+  const [gratitudes, setGratitudes] = useState<string[]>(() => {
+    const lines = (initial?.gratitude ?? "").split("\n").filter((l) => l.trim() !== "");
+    while (lines.length < 3) lines.push("");
+    return lines;
+  });
+
+  function setGratitude(i: number, value: string) {
+    setGratitudes((prev) => prev.map((g, j) => (j === i ? value : g)));
+  }
 
   const sleepHours = sleepHoursBetween(bedTime, wakeTime);
 
@@ -121,7 +131,7 @@ export function CheckinCard({ logDate, initial, defaultMode, bedGoal, wakeGoal }
             energyEvening,
             moodWord: moodWord || null,
             drain: drain || null,
-            gratitude: gratitude || null,
+            gratitude: gratitudes.map((g) => g.trim()).filter(Boolean).join("\n") || null,
           };
 
     startTransition(async () => {
@@ -224,15 +234,32 @@ export function CheckinCard({ logDate, initial, defaultMode, bedGoal, wakeGoal }
             />
           </label>
 
-          <label className="block">
-            <span className="eyebrow mb-2 block">One thing you&rsquo;re grateful for</span>
-            <textarea
-              value={gratitude}
-              onChange={(e) => setGratitude(e.target.value)}
-              rows={2}
-              className="w-full resize-none rounded-control border border-haze bg-transparent px-3 py-2 text-body"
-            />
-          </label>
+          <div>
+            <p className="eyebrow mb-2">Things you&rsquo;re grateful for</p>
+            <div className="space-y-2">
+              {gratitudes.map((g, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span aria-hidden="true" className="text-ink-soft">
+                    &middot;
+                  </span>
+                  <input
+                    value={g}
+                    onChange={(e) => setGratitude(i, e.target.value)}
+                    placeholder={i === 0 ? "The walk home" : ""}
+                    aria-label={`Grateful for, ${i + 1}`}
+                    className="w-full rounded-control border border-haze bg-transparent px-3 py-2 text-body"
+                  />
+                </div>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setGratitudes([...gratitudes, ""])}
+              className="mt-2 text-eyebrow text-ink-soft underline underline-offset-2 hover:text-ink"
+            >
+              Add another
+            </button>
+          </div>
         </div>
       )}
 

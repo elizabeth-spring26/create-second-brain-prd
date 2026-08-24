@@ -286,10 +286,6 @@ body {
   50%      { transform: translateY(-4px); }
 }
 
-@keyframes ribbon-draw {
-  to { stroke-dashoffset: 0; }
-}
-
 .petal-float {
   animation: petal-float 3s ease-in-out infinite;
   transform-box: fill-box;
@@ -304,12 +300,6 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-  /* Drop to opacity-only: the ribbon appears rather than draws. */
-  .ribbon-path {
-    stroke-dasharray: none !important;
-    stroke-dashoffset: 0 !important;
-    animation: none !important;
   }
   .petal-float {
     animation: none !important;
