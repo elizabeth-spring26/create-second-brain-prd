@@ -7,7 +7,6 @@ import {
   habits,
   monthlyGoals,
   weeklyReviews,
-  workSessions,
 } from "@/db/schema";
 import { addDaysISO, monthStartISO, weekStartISO } from "@/lib/dates";
 
@@ -60,12 +59,6 @@ export async function getWeekStats(weekStart: string) {
     }
   }
 
-  const sessions = await db
-    .select()
-    .from(workSessions)
-    .where(and(gte(workSessions.sessionDate, weekStart), lte(workSessions.sessionDate, weekEnd)));
-  const minutes = sessions.reduce((sum, s) => sum + (s.minutes ?? 0), 0);
-
   const avg = (xs: number[]) =>
     xs.length === 0 ? null : Math.round((xs.reduce((a, b) => a + b, 0) / xs.length) * 10) / 10;
 
@@ -75,7 +68,6 @@ export async function getWeekStats(weekStart: string) {
     sleepAvg: avg(sleeps),
     energyAvg: avg(energies),
     habitPct: possible > 0 ? Math.round((kept / possible) * 100) : null,
-    hoursWorked: Math.round((minutes / 60) * 10) / 10,
     daysLogged: checkins.length,
   };
 }

@@ -11,7 +11,6 @@ import {
   Settings,
   Sparkles,
   Target,
-  Timer,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -27,7 +26,6 @@ const ITEMS = [
   { href: "/reflect", label: "Reflect", icon: Sparkles },
   { href: "/school", label: "School", icon: GraduationCap },
   { href: "/career", label: "Career", icon: BriefcaseBusiness },
-  { href: "/work", label: "Work", icon: Timer },
   { href: "/calendar", label: "Calendar", icon: CalendarDays },
   { href: "/insights", label: "Insights", icon: LineChart },
   { href: "/settings", label: "Settings", icon: Settings },

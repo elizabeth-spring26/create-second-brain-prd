@@ -33,7 +33,7 @@ export default async function ReflectPage() {
       {/* Real numbers first — she reflects against them, not in a vacuum. */}
       <Card className="mb-14">
         <Eyebrow className="mb-5">This week, so far</Eyebrow>
-        <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
+        <div className="grid grid-cols-3 gap-6">
           <Stat
             label="Sleep"
             value={stats.sleepAvg === null ? "—" : `${stats.sleepAvg}h`}
@@ -44,7 +44,6 @@ export default async function ReflectPage() {
             label="Habits"
             value={stats.habitPct === null ? "—" : `${stats.habitPct}%`}
           />
-          <Stat label="Hours" value={`${stats.hoursWorked}h`} />
         </div>
         {lastWeek?.computedSleepAvg != null && stats.sleepAvg != null ? (
           <p className="mt-6 text-caption text-ink-soft">

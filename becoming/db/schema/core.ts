@@ -31,10 +31,13 @@ export const settings = sqliteTable("settings", {
   sleepGoalHours: real("sleep_goal_hours"),
   energyGoal: integer("energy_goal"),
   /**
-   * Canvas is off by default: last semester's assignments are noise until the
-   * new schedule starts. Flip this on /settings when term begins.
+   * Vestigial. Canvas assignments are always shown now — the old global
+   * on/off switch meant a fresh term looked empty until she remembered to
+   * flip it. Per-course visibility (courses.is_hidden) is the control that
+   * remains. Kept as a column so the existing rows don't need a destructive
+   * migration.
    */
-  showCanvas: integer("show_canvas", { mode: "boolean" }).notNull().default(false),
+  showCanvas: integer("show_canvas", { mode: "boolean" }).notNull().default(true),
   onboardedAt: integer("onboarded_at", { mode: "timestamp" }),
   createdAt: createdAt(),
   updatedAt: updatedAt(),

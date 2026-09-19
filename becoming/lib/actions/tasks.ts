@@ -5,7 +5,6 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
 import { assignments, courses, meetings, tasks } from "@/db/schema";
-import { getSettings } from "@/lib/queries/daily";
 import { addDaysISO, toLogDate, todayISO, weekStartISO } from "@/lib/dates";
 import { parseFollowUps } from "@/lib/granola/sync";
 
@@ -80,7 +79,6 @@ export async function moveTask(id: string, dueDate: string | null) {
  * updates rather than duplicating, and never resets something already ticked.
  */
 export async function importTasks() {
-  const settings = await getSettings();
   const today = todayISO();
   const weekEnd = addDaysISO(weekStartISO(), 6);
   let imported = 0;
@@ -125,30 +123,28 @@ export async function importTasks() {
     }
   }
 
-  // ── Canvas, only if she's switched it on ─────────────────────────────────
-  if (settings?.showCanvas) {
-    const rows = await db
-      .select({
-        id: assignments.canvasAssignmentId,
-        title: assignments.title,
-        dueAt: assignments.dueAt,
-        url: assignments.htmlUrl,
-        hidden: courses.isHidden,
-      })
-      .from(assignments)
-      .leftJoin(courses, eq(assignments.courseId, courses.id))
-      .where(and(isNotNull(assignments.dueAt), lte(assignments.dueAt, new Date(`${weekEnd}T23:59:59`))));
+  // ── Canvas assignments ───────────────────────────────────────────────────
+  const canvasRows = await db
+    .select({
+      id: assignments.canvasAssignmentId,
+      title: assignments.title,
+      dueAt: assignments.dueAt,
+      url: assignments.htmlUrl,
+      hidden: courses.isHidden,
+    })
+    .from(assignments)
+    .leftJoin(courses, eq(assignments.courseId, courses.id))
+    .where(and(isNotNull(assignments.dueAt), lte(assignments.dueAt, new Date(`${weekEnd}T23:59:59`))));
 
-    for (const a of rows) {
-      if (a.hidden || !a.id || !a.dueAt) continue;
-      const due = toLogDate(a.dueAt);
-      if (due < today) continue; // last semester is noise
-      await upsert("canvas", String(a.id), {
-        title: a.title,
-        dueDate: due,
-        url: a.url,
-      });
-    }
+  for (const a of canvasRows) {
+    if (a.hidden || !a.id || !a.dueAt) continue;
+    const due = toLogDate(a.dueAt);
+    if (due < today) continue; // last semester is noise
+    await upsert("canvas", String(a.id), {
+      title: a.title,
+      dueDate: due,
+      url: a.url,
+    });
   }
 
   revalidatePath("/");

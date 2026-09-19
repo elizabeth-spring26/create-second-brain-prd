@@ -57,6 +57,25 @@ export async function updateApplication(
   return { ok: true as const };
 }
 
+export async function deleteApplication(id: string) {
+  await db.delete(jobApplications).where(eq(jobApplications.id, id));
+  revalidatePath("/career");
+  return { ok: true as const };
+}
+
+/** The one-click move from the board: Applied → Interviewing → Rejected. */
+export async function setApplicationStatus(id: string, status: (typeof STATUSES)[number]) {
+  if (!STATUSES.includes(status)) {
+    return { ok: false as const, error: "Unknown status" };
+  }
+  await db
+    .update(jobApplications)
+    .set({ status, updatedAt: new Date() })
+    .where(eq(jobApplications.id, id));
+  revalidatePath("/career");
+  return { ok: true as const };
+}
+
 const OfferSchema = z.object({
   jobApplicationId: z.string().nullish(),
   company: z.string().min(1).max(200),

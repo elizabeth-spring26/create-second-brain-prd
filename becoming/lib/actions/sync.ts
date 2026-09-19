@@ -16,7 +16,6 @@ export async function runCanvasSync() {
 export async function runGranolaSync() {
   const res = await syncGranola();
   revalidatePath("/school");
-  revalidatePath("/work");
   revalidatePath("/settings");
   return res;
 }

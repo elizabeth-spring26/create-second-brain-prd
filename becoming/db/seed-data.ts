@@ -114,20 +114,6 @@ export const SEED_HABITS: SeedHabit[] = [
 
 export const SEED_OFFER_CRITERIA = DEFAULT_OFFER_CRITERIA;
 
-export const SEED_ENGAGEMENTS: {
-  name: string;
-  kind: "internship" | "client" | "generator" | "personal";
-  hoursTargetWeekly?: number;
-  hourlyRate?: number;
-  isBillableDefault?: boolean;
-  colorToken: string;
-}[] = [
-  { name: "The Generator", kind: "generator", colorToken: "iris" },
-  { name: "AI consulting", kind: "client", colorToken: "sakura" },
-  // Renamed once she accepts an offer, so hours logged now aren't stranded.
-  { name: "Internship", kind: "internship", colorToken: "matcha" },
-];
-
 export const SEED_SETTINGS = {
   displayName: "Elizabeth",
   timezone: "America/New_York",

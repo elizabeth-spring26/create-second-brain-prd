@@ -1,9 +1,9 @@
 import { AssignmentRow } from "@/components/assignment-row";
+import { CanvasAutoSync } from "@/components/canvas-autosync";
 import { SyncButton } from "@/components/sync-button";
 import { Card, Empty, Eyebrow, PageHeader } from "@/components/ui";
 import { getSyncState } from "@/lib/canvas/sync";
 import { easternTime, shortDate, toLogDate } from "@/lib/dates";
-import { getSettings } from "@/lib/queries/daily";
 import { bucketOf, getAssignments, getMeetingFollowUps } from "@/lib/queries/school";
 
 export const dynamic = "force-dynamic";
@@ -18,15 +18,15 @@ const BUCKET_TITLES = {
 
 export default async function SchoolPage() {
   const now = new Date();
-  const [settings, allRows, followUps, canvasState] = await Promise.all([
-    getSettings(),
+  const [allRows, followUps, canvasState] = await Promise.all([
     getAssignments(),
     getMeetingFollowUps(4),
     getSyncState("canvas"),
   ]);
 
-  // Canvas is hidden until the new term starts; hidden courses stay out too.
-  const rows = settings?.showCanvas ? allRows.filter((r) => !r.courseHidden) : [];
+  // Everything Canvas knows about, minus courses she's explicitly dropped
+  // from view in settings.
+  const rows = allRows.filter((r) => !r.courseHidden);
 
   const buckets: Record<string, typeof rows> = {
     overdue: [],
@@ -54,6 +54,10 @@ export default async function SchoolPage() {
         action={<SyncButton provider="canvas" />}
       />
 
+      <CanvasAutoSync
+        lastSuccessMs={canvasState?.lastSuccessAt ? canvasState.lastSuccessAt.getTime() : null}
+      />
+
       {canvasState?.lastError ? (
         <Card className="mb-8">
           <p className="text-caption">
@@ -69,9 +73,9 @@ export default async function SchoolPage() {
       {rows.length === 0 ? (
         <Card>
           <Empty>
-            {settings?.showCanvas
-              ? "Nothing due. Hit sync and your active Canvas courses will land here."
-              : "Canvas is off while your new schedule hasn't started. Turn it back on in settings when term begins — syncing keeps running in the background, so nothing is lost."}
+            Nothing due right now. Your active Canvas courses sync on their own
+            when you open this page — if a course is missing, check that it
+            isn&rsquo;t hidden in settings.
           </Empty>
         </Card>
       ) : (

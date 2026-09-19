@@ -66,8 +66,8 @@ export default async function SettingsPage({
       </Card>
 
       <Card className="mb-8">
-        <Eyebrow className="mb-5">Canvas</Eyebrow>
-        <CanvasControls showCanvas={Boolean(settings?.showCanvas)} courses={courseRows} />
+        <Eyebrow className="mb-5">Your courses</Eyebrow>
+        <CanvasControls courses={courseRows} />
       </Card>
 
       <Card className="mb-8">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { setCourseHidden, setShowCanvas } from "@/lib/actions/settings";
+import { setCourseHidden } from "@/lib/actions/settings";
 
 export type CourseRow = {
   id: string;
@@ -11,68 +11,55 @@ export type CourseRow = {
   count: number;
 };
 
-export function CanvasControls({
-  showCanvas,
-  courses,
-}: {
-  showCanvas: boolean;
-  courses: CourseRow[];
-}) {
+/**
+ * There used to be a global "show Canvas" switch in front of this list. It
+ * made every new term start invisible, so the only control left is per-course:
+ * uncheck the ones whose work you don't want in your week.
+ */
+export function CanvasControls({ courses }: { courses: CourseRow[] }) {
   const [, startTransition] = useTransition();
-  const [on, setOn] = useState(showCanvas);
   const [hidden, setHidden] = useState(
     Object.fromEntries(courses.map((c) => [c.id, c.isHidden])),
   );
 
+  if (courses.length === 0) {
+    return (
+      <p className="text-caption text-ink-soft">
+        No courses synced yet. Open School and your active Canvas courses pull
+        themselves in.
+      </p>
+    );
+  }
+
   return (
     <div>
-      <label className="flex items-center gap-3 text-caption">
-        <input
-          type="checkbox"
-          checked={on}
-          onChange={(e) => {
-            const v = e.target.checked;
-            setOn(v);
-            startTransition(async () => {
-              await setShowCanvas(v);
-            });
-          }}
-        />
-        Show Canvas assignments
-      </label>
-      <p className="mt-2 text-eyebrow text-ink-soft">
-        Off while your new schedule hasn&rsquo;t started — last term&rsquo;s work stays out
-        of the week. Syncing still runs, so nothing is lost when you flip it back on.
+      <p className="mb-4 text-eyebrow text-ink-soft">
+        Checked courses show up on School and in your week. Assignments sync on
+        their own — this only decides what you look at.
       </p>
-
-      {courses.length > 0 ? (
-        <div className="mt-6">
-          <p className="eyebrow mb-3">Courses</p>
-          <div className="space-y-2">
-            {courses.map((c) => (
-              <label key={c.id} className="flex items-start gap-3 text-caption">
-                <input
-                  type="checkbox"
-                  checked={!hidden[c.id]}
-                  onChange={(e) => {
-                    const v = !e.target.checked;
-                    setHidden((p) => ({ ...p, [c.id]: v }));
-                    startTransition(async () => {
-                      await setCourseHidden(c.id, v);
-                    });
-                  }}
-                />
-                <span className={hidden[c.id] ? "text-ink-soft line-through" : undefined}>
-                  {c.name}
-                  <span className="ml-2 font-mono text-eyebrow text-ink-soft">
-                    {c.term ?? "no term"} · {c.count}
-                  </span>
-                </span>
-              </label>
-            ))}
-          </div>
-        </div>
-      ) : null}
+      <div className="space-y-2">
+        {courses.map((c) => (
+          <label key={c.id} className="flex items-start gap-3 text-caption">
+            <input
+              type="checkbox"
+              checked={!hidden[c.id]}
+              onChange={(e) => {
+                const v = !e.target.checked;
+                setHidden((p) => ({ ...p, [c.id]: v }));
+                startTransition(async () => {
+                  await setCourseHidden(c.id, v);
+                });
+              }}
+            />
+            <span className={hidden[c.id] ? "text-ink-soft line-through" : undefined}>
+              {c.name}
+              <span className="ml-2 font-mono text-eyebrow text-ink-soft">
+                {c.term ?? "no term"} · {c.count}
+              </span>
+            </span>
+          </label>
+        ))}
+      </div>
     </div>
   );
 }

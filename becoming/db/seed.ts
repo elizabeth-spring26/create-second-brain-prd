@@ -3,12 +3,12 @@ config({ path: ".env.local" });
 
 import { eq } from "drizzle-orm";
 import { db } from "./index";
-import { engagements, habits, offerCriteria, settings } from "./schema";
-import { SEED_ENGAGEMENTS, SEED_HABITS, SEED_OFFER_CRITERIA, SEED_SETTINGS } from "./seed-data";
+import { habits, offerCriteria, settings } from "./schema";
+import { SEED_HABITS, SEED_OFFER_CRITERIA, SEED_SETTINGS } from "./seed-data";
 
 /**
- * Idempotent. Matches on natural keys (habit name, criterion label, engagement
- * name) so re-running never duplicates and never clobbers edits made in the UI.
+ * Idempotent. Matches on natural keys (habit name, criterion label) so
+ * re-running never duplicates and never clobbers edits made in the UI.
  */
 async function main() {
   let created = 0;
@@ -81,22 +81,6 @@ async function main() {
     }
     await db.insert(offerCriteria).values({ label, weight: 3, sortOrder: i });
     console.log(`offer criterion    + ${label}`);
-    created++;
-  }
-
-  // ── engagements ────────────────────────────────────────────────────────────
-  for (const e of SEED_ENGAGEMENTS) {
-    const found = await db
-      .select()
-      .from(engagements)
-      .where(eq(engagements.name, e.name))
-      .limit(1);
-    if (found.length > 0) {
-      skipped++;
-      continue;
-    }
-    await db.insert(engagements).values(e);
-    console.log(`engagement         + ${e.name} (${e.kind})`);
     created++;
   }
 
