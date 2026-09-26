@@ -1,16 +1,21 @@
 "use client";
 
-import { Plus, X } from "lucide-react";
+import { Highlighter, Plus, X } from "lucide-react";
 import { useOptimistic, useState, useTransition } from "react";
 import { Leaf } from "@/components/ghibli";
 import {
   addTask,
   addWeeklyGoal,
   deleteTask,
+  highlightTask,
   importTasks,
   toggleTask,
 } from "@/lib/actions/tasks";
 import { cn } from "@/lib/utils";
+
+/** Marker colours, in the order the pens sit in the tray. */
+export const HIGHLIGHTS = ["amber", "sakura", "matcha", "iris"] as const;
+export type Highlight = (typeof HIGHLIGHTS)[number];
 
 export type Task = {
   id: string;
@@ -19,7 +24,11 @@ export type Task = {
   dueDate: string | null;
   done: boolean;
   url: string | null;
+  highlight: Highlight | null;
 };
+
+/** A marker stroke is a wash, not a fill — the ink has to stay readable. */
+const inkWash = (c: Highlight) => `color-mix(in oklab, var(--${c}) 52%, transparent)`;
 
 type Props = {
   days: string[];
@@ -47,11 +56,16 @@ function TaskLine({
   t,
   onToggle,
   onDelete,
+  onPaint,
+  painting,
   prefix,
 }: {
   t: Task;
   onToggle: (id: string) => void;
   onDelete: (id: string) => void;
+  onPaint: (id: string) => void;
+  /** True while the highlighter is out: the row paints instead of opening. */
+  painting: boolean;
   /** Optional leading label, e.g. the date when the day isn't implied. */
   prefix?: string;
 }) {
@@ -86,20 +100,37 @@ function TaskLine({
         ) : null}
       </button>
 
-      <span
-        className={cn(
-          "flex-1 text-[0.8rem] leading-snug",
-          t.done && "text-ink-soft line-through",
-        )}
-      >
-        {t.url ? (
-          <a href={t.url} target="_blank" rel="noreferrer" className="hover:underline">
-            {t.title}
-          </a>
-        ) : (
-          t.title
-        )}
-      </span>
+      {painting ? (
+        <button
+          type="button"
+          onClick={() => onPaint(t.id)}
+          aria-label={`Highlight ${t.title}`}
+          aria-pressed={t.highlight !== null}
+          className={cn(
+            "flex-1 cursor-[cell] rounded-[4px] px-1 text-left text-[0.8rem] leading-snug",
+            t.done && "text-ink-soft line-through",
+          )}
+          style={t.highlight ? { background: inkWash(t.highlight) } : undefined}
+        >
+          {t.title}
+        </button>
+      ) : (
+        <span
+          className={cn(
+            "flex-1 rounded-[4px] px-1 text-[0.8rem] leading-snug",
+            t.done && "text-ink-soft line-through",
+          )}
+          style={t.highlight ? { background: inkWash(t.highlight) } : undefined}
+        >
+          {t.url ? (
+            <a href={t.url} target="_blank" rel="noreferrer" className="hover:underline">
+              {t.title}
+            </a>
+          ) : (
+            t.title
+          )}
+        </span>
+      )}
 
       <button
         type="button"
@@ -126,6 +157,8 @@ export function WeekBoard({
   const [draft, setDraft] = useState("");
   const [importing, setImporting] = useState<string | null>(null);
   const [goalsExpanded, setGoalsExpanded] = useState(false);
+  /** Which pen is uncapped. Null means the highlighter is away. */
+  const [pen, setPen] = useState<Highlight | null>(null);
 
   const all = [
     ...Object.values(byDay).flat(),
@@ -133,19 +166,37 @@ export function WeekBoard({
     ...laterThisMonth,
     ...weeklyGoals,
   ];
-  const [optimistic, setOptimistic] = useOptimistic(
-    all,
-    (state: Task[], id: string) =>
-      state.map((t) => (t.id === id ? { ...t, done: !t.done } : t)),
+
+  type Edit =
+    | { kind: "toggle"; id: string }
+    | { kind: "paint"; id: string; color: Highlight };
+
+  const [optimistic, setOptimistic] = useOptimistic(all, (state: Task[], e: Edit) =>
+    state.map((t) => {
+      if (t.id !== e.id) return t;
+      if (e.kind === "toggle") return { ...t, done: !t.done };
+      return { ...t, highlight: t.highlight === e.color ? null : e.color };
+    }),
   );
   const doneOf = (id: string) => optimistic.find((t) => t.id === id)?.done ?? false;
+  const paintOf = (id: string) =>
+    optimistic.find((t) => t.id === id)?.highlight ?? null;
 
   function onToggle(id: string) {
     startTransition(async () => {
-      setOptimistic(id);
+      setOptimistic({ kind: "toggle", id });
       await toggleTask(id);
     });
   }
+
+  function onPaint(id: string) {
+    if (!pen) return;
+    startTransition(async () => {
+      setOptimistic({ kind: "paint", id, color: pen });
+      await highlightTask(id, pen);
+    });
+  }
+
   function onDelete(id: string) {
     startTransition(async () => {
       await deleteTask(id);
@@ -171,12 +222,59 @@ export function WeekBoard({
     });
   }
 
-  const withState = (t: Task): Task => ({ ...t, done: doneOf(t.id) });
+  const withState = (t: Task): Task => ({
+    ...t,
+    done: doneOf(t.id),
+    highlight: paintOf(t.id),
+  });
 
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <p className="eyebrow">Monday → Sunday</p>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Highlighter — uncap a pen, then tap any task to mark it as one of
+              the few that actually matter today. Same pen again wipes it. */}
+          <button
+            type="button"
+            aria-pressed={pen !== null}
+            aria-label={pen ? "Put the highlighter away" : "Pick up the highlighter"}
+            onClick={() => setPen(pen ? null : HIGHLIGHTS[0])}
+            className="btn-cel flex items-center gap-1.5 text-[0.75rem]"
+            style={{
+              background: pen ? inkWash(pen) : "var(--card)",
+            }}
+          >
+            <Highlighter size={13} />
+            {pen ? "Done" : "Highlight"}
+          </button>
+
+          {pen ? (
+            <div
+              role="radiogroup"
+              aria-label="Highlighter colour"
+              className="flex items-center gap-1.5"
+            >
+              {HIGHLIGHTS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  role="radio"
+                  aria-checked={pen === c}
+                  aria-label={c}
+                  onClick={() => setPen(c)}
+                  className={cn(
+                    "size-5 rounded-full border-[1.5px] border-ink transition-transform",
+                    pen === c && "scale-125",
+                  )}
+                  style={{ background: `var(--${c})` }}
+                />
+              ))}
+            </div>
+          ) : null}
+        </div>
+
         <button
           className="btn-cel text-[0.75rem]"
           onClick={() =>
@@ -216,7 +314,14 @@ export function WeekBoard({
 
               <ul className="flex-1 space-y-2">
                 {list.map((t) => (
-                  <TaskLine key={t.id} t={t} onToggle={onToggle} onDelete={onDelete} />
+                  <TaskLine
+                  key={t.id}
+                  t={t}
+                  onToggle={onToggle}
+                  onDelete={onDelete}
+                  onPaint={onPaint}
+                  painting={pen !== null}
+                />
                 ))}
               </ul>
 
@@ -272,7 +377,14 @@ export function WeekBoard({
             {(goalsExpanded ? weeklyGoals : weeklyGoals.slice(0, GOAL_PREVIEW))
               .map(withState)
               .map((t) => (
-                <TaskLine key={t.id} t={t} onToggle={onToggle} onDelete={onDelete} />
+                <TaskLine
+                  key={t.id}
+                  t={t}
+                  onToggle={onToggle}
+                  onDelete={onDelete}
+                  onPaint={onPaint}
+                  painting={pen !== null}
+                />
               ))}
           </ul>
 
@@ -326,7 +438,14 @@ export function WeekBoard({
           </div>
           <ul className="flex-1 space-y-2">
             {undated.map(withState).map((t) => (
-              <TaskLine key={t.id} t={t} onToggle={onToggle} onDelete={onDelete} />
+              <TaskLine
+                key={t.id}
+                t={t}
+                onToggle={onToggle}
+                onDelete={onDelete}
+                onPaint={onPaint}
+                painting={pen !== null}
+              />
             ))}
           </ul>
           {adding === "none" ? (
@@ -375,6 +494,8 @@ export function WeekBoard({
                 t={t}
                 onToggle={onToggle}
                 onDelete={onDelete}
+                onPaint={onPaint}
+                painting={pen !== null}
                 prefix={t.dueDate?.slice(5)}
               />
             ))}

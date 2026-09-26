@@ -4,7 +4,7 @@ import { and, eq, isNotNull, lte } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db";
-import { assignments, courses, meetings, tasks } from "@/db/schema";
+import { assignments, courses, meetings, TASK_HIGHLIGHTS, tasks } from "@/db/schema";
 import { addDaysISO, toLogDate, todayISO, weekStartISO } from "@/lib/dates";
 import { parseFollowUps } from "@/lib/granola/sync";
 
@@ -59,6 +59,32 @@ export async function toggleTask(id: string) {
     .where(eq(tasks.id, id));
   revalidatePath("/");
   return { ok: true as const };
+}
+
+const Highlight = z.enum(TASK_HIGHLIGHTS).nullable();
+
+/**
+ * Paint (or wipe) the marker on a task. Passing the colour already on the row
+ * clears it, so tapping the same pen twice undoes the stroke.
+ */
+export async function highlightTask(id: string, color: string | null) {
+  const parsed = Highlight.safeParse(color);
+  if (!parsed.success) return { ok: false as const, error: "Unknown highlighter." };
+
+  const rows = await db
+    .select({ highlight: tasks.highlight })
+    .from(tasks)
+    .where(eq(tasks.id, id))
+    .limit(1);
+  if (rows.length === 0) return { ok: false as const, error: "Task not found." };
+
+  const next = rows[0].highlight === parsed.data ? null : parsed.data;
+  await db
+    .update(tasks)
+    .set({ highlight: next, updatedAt: new Date() })
+    .where(eq(tasks.id, id));
+  revalidatePath("/");
+  return { ok: true as const, highlight: next };
 }
 
 export async function deleteTask(id: string) {

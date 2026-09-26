@@ -11,6 +11,12 @@ export const TASK_SOURCES = ["manual", "canvas", "granola"] as const;
 export const TASK_SCOPES = ["task", "weekly_goal"] as const;
 
 /**
+ * Marker colours for the highlighter. Same four tokens the rest of the app
+ * paints with, so a highlighted row still belongs to the palette.
+ */
+export const TASK_HIGHLIGHTS = ["amber", "sakura", "matcha", "iris"] as const;
+
+/**
  * One unified list for the week, whatever the task came from. Canvas
  * assignments and Granola follow-ups are mirrored in here rather than being
  * shown in separate silos — the week is the week.
@@ -33,6 +39,8 @@ export const tasks = sqliteTable(
     done: integer("done", { mode: "boolean" }).notNull().default(false),
     doneAt: integer("done_at", { mode: "timestamp" }),
     notes: text("notes"),
+    /** Marker colour she painted on the row, or null for un-highlighted. */
+    highlight: text("highlight", { enum: TASK_HIGHLIGHTS }),
     /** Where it came from, so she can open the meeting or assignment. */
     url: text("url"),
     sortOrder: integer("sort_order").notNull().default(0),

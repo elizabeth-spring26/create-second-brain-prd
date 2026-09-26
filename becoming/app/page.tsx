@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CheckinCard } from "@/components/checkin-card";
 import { HabitRow, type HabitItem } from "@/components/habit-row";
 import { MonthlyGoalsList } from "@/components/monthly-goals";
-import { WeekBoard, type Task } from "@/components/week-board";
+import { WeekBoard, type Highlight, type Task } from "@/components/week-board";
 import { affirmationFor, reflectionFor } from "@/lib/affirmations";
 import { easternHour, prettyDate, todayISO } from "@/lib/dates";
 import {
@@ -61,6 +61,7 @@ export default async function TodayPage() {
     dueDate: string | null;
     done: boolean;
     url: string | null;
+    highlight: Highlight | null;
   }): Task => ({
     id: t.id,
     title: t.title,
@@ -68,6 +69,7 @@ export default async function TodayPage() {
     dueDate: t.dueDate,
     done: t.done,
     url: t.url,
+    highlight: t.highlight,
   });
 
   const byDay: Record<string, Task[]> = {};
