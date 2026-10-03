@@ -287,11 +287,6 @@ export function ApplicationBoard({ applications }: { applications: ApplicationRo
       rows: applications.filter((a) => a.status === "applied"),
     },
     {
-      key: "saved",
-      label: "Saved to apply",
-      rows: applications.filter((a) => a.status === "saved"),
-    },
-    {
       key: "closed",
       label: "Closed",
       rows: applications.filter((a) => ["rejected", "withdrawn"].includes(a.status)),

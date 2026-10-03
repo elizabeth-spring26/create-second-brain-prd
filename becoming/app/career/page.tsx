@@ -1,5 +1,6 @@
 import { ApplicationBoard, type ApplicationRow } from "@/components/application-board";
 import { OfferMatrix } from "@/components/offer-matrix";
+import { ToApplyList } from "@/components/to-apply-list";
 import { Card, Eyebrow, PageHeader, Stat } from "@/components/ui";
 import { todayISO } from "@/lib/dates";
 import { funnel, needsAttention } from "@/lib/career-math";
@@ -73,10 +74,16 @@ export default async function CareerPage() {
         </Card>
       ) : null}
 
+      {/* Decided on, not sent yet */}
+      <section className="mb-16">
+        <Eyebrow className="mb-5">To apply</Eyebrow>
+        <ToApplyList applications={apps.filter((a) => a.status === "saved").map(strip)} />
+      </section>
+
       {/* Applications */}
       <section className="mb-16">
         <Eyebrow className="mb-5">Applications</Eyebrow>
-        <ApplicationBoard applications={apps.map(strip)} />
+        <ApplicationBoard applications={apps.filter((a) => a.status !== "saved").map(strip)} />
       </section>
 
       {/* The decision */}
